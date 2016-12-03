@@ -68,30 +68,75 @@ def updatePosPlayer(posP, arena, mvDist):
 
     return arena,(x + changeX,y + changeY)
 
-def mvDist(posG,arena):
-    distList = []
-    for k in range(0,5):
-        distList.append(random.random())
+def mvDistGhost(posG, arena, posP):
+    distList = [0.5, 0.5, 0.5, 0.5]
+
+    if posG[0] > posP[0]:
+        distList[0] = 0.75
+        distList[1] = 0.25
+    elif posG[0] < posP[0]:
+        distList[0] = 0.25
+        distList[1] = 0.75
+
+    if posG[1] > posP[1]:
+        distList[2] = 0.25
+        distList[3] = 0.75
+    elif posG[1] < posP[1]:
+        distList[2] = 0.75
+        distList[3] = 0.25
+        
+#    for k in range(0,5):
+#        distList.append(random.random())
     if posG[0] == 0:
         distList[0] = 0
     if posG[1] == 0:
         distList[1] = 0
     if posG[0] == len(arena)-1:
-        distList[2] = 0       
+        distList[2] = 0      
     if posG[1] == len(arena[0])-1:
         distList[3] = 0
     return distList
 
+def mvDistPlayer(pos, arena):
+#    distList = [0.5, 0.5, 0.5, 0.5]
+    distList = []
 
-board,listOfPositions,listOfValues = setupArena(20,20)
+#    if posG[0] > posP[0]:
+#        distList[0] = 0.75
+#        distList[1] = 0.25
+#    else:
+#        distList[0] = 0.25
+#        distList[1] = 0.75
+
+#    if posG[1] > posP[1]:
+#        distList[2] = 0.75
+#        distList[3] = 0.25
+#    else:
+#        distList[2] = 0.25
+#        distList[3] = 0.75
+        
+    for k in range(0,5):
+        distList.append(random.random())
+    if pos[4][0] == 0:
+        distList[0] = 0
+    if pos[4][1] == 0:
+        distList[1] = 0
+    if pos[4][0] == len(arena)-1:
+        distList[2] = 0      
+    if pos[4][1] == len(arena[0])-1:
+        distList[3] = 0
+    return distList
+
+
+board,listOfPositions,listOfValues = setupArena(50,50)
 
 while not gameover:
     print #print()
-    board,listOfPositions[4] = updatePosPlayer(listOfPositions[4],board, mvDist(listOfPositions[4], board))
-    board,listOfPositions[0],listOfValues[0] = updatePosGhost(listOfPositions[0],listOfValues[0],board,mvDist(listOfPositions[0],board),1)
-    board,listOfPositions[1],listOfValues[1] = updatePosGhost(listOfPositions[1],listOfValues[1],board,mvDist(listOfPositions[1],board),2)
-    board,listOfPositions[2],listOfValues[2] = updatePosGhost(listOfPositions[2],listOfValues[2],board,mvDist(listOfPositions[2],board),3)
-    board,listOfPositions[3],listOfValues[3] = updatePosGhost(listOfPositions[3],listOfValues[3],board,mvDist(listOfPositions[3],board),4)
+    board,listOfPositions[4] = updatePosPlayer(listOfPositions[4],board, mvDistPlayer(listOfPositions, board))
+    board,listOfPositions[0],listOfValues[0] = updatePosGhost(listOfPositions[0],listOfValues[0],board,mvDistGhost(listOfPositions[0],board, listOfPositions[4]),1)
+    board,listOfPositions[1],listOfValues[1] = updatePosGhost(listOfPositions[1],listOfValues[1],board,mvDistGhost(listOfPositions[1],board, listOfPositions[4]),2)
+    board,listOfPositions[2],listOfValues[2] = updatePosGhost(listOfPositions[2],listOfValues[2],board,mvDistGhost(listOfPositions[2],board, listOfPositions[4]),3)
+    board,listOfPositions[3],listOfValues[3] = updatePosGhost(listOfPositions[3],listOfValues[3],board,mvDistGhost(listOfPositions[3],board, listOfPositions[4]),4)
     if ((listOfPositions[4][0] - 1), listOfPositions[4][1]) in listOfPositions:
         gameover = True
     if ((listOfPositions[4][0] + 1), listOfPositions[4][1]) in listOfPositions:
