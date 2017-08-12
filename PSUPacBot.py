@@ -2,7 +2,7 @@
 
 #This code is a simulation and code base for the PennState robotics club
 #entry into the Harvard PacMan robotics competition. Code written by:
-#Geoffrey Billy, 
+#Geoffrey Billy,
 #Saimun Shahee,
 #Kate Heasley,
 #Dimitri Lewicki
@@ -10,36 +10,59 @@
 
 import random
 
-gameover = False
+def setupGame(row,column):
 
-def setupGame(r,c):
+    # a location has 5 associated values: whether it is up, down, left, right linked and whether or not PacBot has been there
+    arena = [[[False for z in range(5)] for x in range(row)] for y in range(column)]
 
-    # linked [x-1, x+1, y-1, y+1, dot]
-    actualarena, playerknownarena = [[[False for z in range(5)] for x in range(r)] for y in range(c)]
+    ghost1 = (random.randint(0, row-1), random.randint(0, column-1))
+    ghost2 = (random.randint(0, row-1), random.randint(0, column-1))
+    ghost3 = (random.randint(0, row-1), random.randint(0, column-1))
+    ghost4 = (random.randint(0, row-1), random.randint(0, column-1))
+    player =  (random.randint(0, row-1), random.randint(0, column-1))
 
-    ghostie1 = (random.randint(0, r-1), random.randint(0, c-1))
-    ghostie2 = (random.randint(0, r-1), random.randint(0, c-1))
-    ghostie3 = (random.randint(0, r-1), random.randint(0, c-1))
-    ghostie4 = (random.randint(0, r-1), random.randint(0, c-1))
-    player =  (random.randint(0, r-1), random.randint(0, c-1))
+    positions = [ghost1, ghost2, ghost3, ghost4, player]
 
-    positions = [ghostie1, ghostie2, ghostie3, ghostie4, player]
+    return arena, positions
 
-    return actualarena, playerknownarena, positions
+def printBoard(arena, positions):
 
-def ghostieMove(ghostie, pos, arena):
+    #prints row-wise
+    printrow = ''
+    for x in range(len(arena)):
+
+        #parses rows in arena matrix for dots or spaces
+        for y in range(len(arena[0])):
+            if arena[x][y][4]:
+                printrow = printrow + '_'
+            else:
+                printrow = printrow + '.'
+
+        #replaces the the dot or space for the character when needed
+        for player in range(4):
+            if positions[player][0] == x:
+                printrow = printrow[:positions[player][1]] + str(player) + printrow[positions[player][1]+1:]
+        if positions[4][0] == x:
+            printrow = printrow[:positions[player][1]] + 'P' + printrow[positions[player][1]+1:]
+
+        #outputs the row to the console and then clears it
+        print printrow
+        printrow = ''
+
+
+def moveGhost(ghostie, pos, arena):
 
     distList = [1, 1, 1, 1]
-    
+
     #STILL NEED TO ADD GHOST COLLISION PREVENTION
-    
+
     for ii in range(4):
         if not arena[pos[ghostie][0]][pos[ghostie][1]][ii]:
             distList[ii] = 0
 
     return distList
 
-def playerMove(pos, arena):
+def movePlayer(pos, arena):
 
     distList = [1, 1, 1, 1]
     distList *= avoidGhosties(distList, pos, arena)
@@ -50,41 +73,14 @@ def playerMove(pos, arena):
 
     return distList
 
-def avoidGhosties(distList, pos, arena):
+def runSimulation():
 
-def updatePKA(p, glp, pka):
+    gameover = False
 
-    change = -1
-    for ghostie in range(4):
+    row = 10
+    column = 10
 
-        if p[ghostie][0] != glp[ghostie][0]:
-            if p[ghostie][0] > glp[ghostie][0]:
-                change = 0
-            else:
-                change = 1
+    arena, positions = setupGame(row, column)
+    printBoard(arena, positions)
 
-        else:
-            if p[ghostie][1] > glp[ghostie][1]:
-                change = 2
-            else:
-                change = 3
-
-        pka[p[ghostie][0]][p[ghostie][1]][change] = True
-        pka[glp[ghostie][0]][glp[ghostie][1]][change] = True
-
-    return pka
-    
-aa, pka, p = setupGame(10,10)
-glp = p
-
-while not gameover:
-
-    pka = updatePKA(p,glp, pka)
-    
-    glp = p
-
-    if (((p[4][0] - 1), p[4][1]) in p or (((p[4][0] + 1), p[4][1]) in p or (((p[4][0]), p[4][1] - 1) in p or (((p[4][0]), p[4][1] + 1) in p:
-        gameover = True
-
-print
-print "GAME OVER"
+runSimulation()
