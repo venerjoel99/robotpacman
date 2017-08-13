@@ -4,7 +4,7 @@ This repo is for the Penn State robotics team competing in the annual robot PacM
 
 ## (2017) Code contributions made by:
 
-  Geoffrey Billy
-  Saimun Shahee
-  Kate Heasley
-  Lauren Colwell
+- Geoffrey Billy
+- Saimun Shahee
+- Kate Heasley
+- Lauren Colwell

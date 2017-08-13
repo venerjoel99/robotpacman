@@ -12,8 +12,8 @@ import random
 
 def setupGame(row,column):
 
-    # a location has 5 associated values: whether it is up, down, left, right linked and whether or not PacBot has been there
-    arena = [[[False for z in range(5)] for x in range(row)] for y in range(column)]
+    # a location has 5 associated values: whether it is up, down, left, right linked and whether or not there is a dot
+    arena = [[[True for z in range(5)] for x in range(row)] for y in range(column)]
 
     ghost1 = (random.randint(0, row-1), random.randint(0, column-1))
     ghost2 = (random.randint(0, row-1), random.randint(0, column-1))
@@ -33,10 +33,15 @@ def printBoard(arena, positions):
 
         #parses rows in arena matrix for dots or spaces
         for y in range(len(arena[0])):
-            if arena[x][y][4]:
-                printrow = printrow + '_'
+            if arena[x][y][3]:
+                printrow = printrow + ' '
             else:
+                printrow = printrow + '|'
+
+            if arena[x][y][4]:
                 printrow = printrow + '.'
+            else:
+                printrow = printrow + 'o'
 
         #replaces the the dot or space for the character when needed
         for player in range(4):
@@ -49,8 +54,16 @@ def printBoard(arena, positions):
         print printrow
         printrow = ''
 
+        for y in range(len(arena[0])):
+            if arena[x][y][0]:
+                printrow = printrow + '  '
+            else:
+                printrow = printrow + ' -'
 
-def moveGhost(ghostie, pos, arena):
+        print printrow
+        printrow = ''
+
+def moveGhost(ghost, pos, arena):
 
     distList = [1, 1, 1, 1]
 
