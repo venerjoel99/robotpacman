@@ -2,28 +2,39 @@
 
 #This code is a simulation and code base for the PennState robotics club
 #entry into the Harvard PacMan robotics competition. Code written by:
-#Geoffrey Billy,
-#Saimun Shahee,
-#Kate Heasley,
-#Dimitri Lewicki
-#Lauren Colwell
+#Geoffrey Billy
+#Saimun Shahee
 
 import random
 
-def setupGame(row,column):
+def setupArena(row, column):
 
-    # a location has 5 associated values: whether it is up, down, left, right linked and whether or not there is a dot
+    # a location has 5 associated values: up, down, left, right linked and exsistence of a dot
     arena = [[[True for z in range(5)] for x in range(row)] for y in range(column)]
 
-    ghost1 = (random.randint(0, row-1), random.randint(0, column-1))
-    ghost2 = (random.randint(0, row-1), random.randint(0, column-1))
-    ghost3 = (random.randint(0, row-1), random.randint(0, column-1))
-    ghost4 = (random.randint(0, row-1), random.randint(0, column-1))
-    player =  (random.randint(0, row-1), random.randint(0, column-1))
+    return arena
 
-    positions = [ghost1, ghost2, ghost3, ghost4, player]
+def setupPositionsRandom(charactercount, positions, row, column):
 
-    return arena, positions
+    for g in range(charactercount):
+
+        #generates a unique position in the row column matrix
+        position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+        while position in positions:
+            position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+
+        #adds it to the rest of the positions
+        positions = positions + position
+
+    return positions
+
+def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
+
+    return
+
+def setWallsRandom(wallpattern, arena):
+
+    return
 
 def printBoard(arena, positions):
 
@@ -31,7 +42,7 @@ def printBoard(arena, positions):
     printrow = ''
     for x in range(len(arena)):
 
-        #parses rows in arena matrix for dots or spaces
+        #parses rows for dots or spaces with vertical walls intersparced when needed
         for y in range(len(arena[0])):
             if arena[x][y][3]:
                 printrow = printrow + ' '
@@ -44,26 +55,28 @@ def printBoard(arena, positions):
                 printrow = printrow + 'o'
 
         #replaces the the dot or space for the character when needed
-        for player in range(4):
+        for player in range(1,5):
             if positions[player][0] == x:
                 printrow = printrow[:positions[player][1] * 2 + 1] + str(player) + printrow[positions[player][1] * 2 + 2:]
-        if positions[4][0] == x:
+        if positions[0][0] == x:
             printrow = printrow[:positions[player][1] * 2 + 1] + 'P' + printrow[positions[player][1]*2 + 2:]
 
-        #outputs the row to the console and then clears it
+        #outputs the row of dots + vertical walls to the console and then clears it
         print printrow
         printrow = ''
 
+        #parses rows for vhorizontal walls when needed
         for y in range(len(arena[0])):
             if arena[x][y][0]:
                 printrow = printrow + '  '
             else:
                 printrow = printrow + ' -'
 
+        #outputs the row of hori to the console and then clears it
         print printrow
         printrow = ''
 
-def moveGhost(ghost, pos, arena):
+def moveGhost(ghost, pos, arena): #OLD
 
     distList = [1, 1, 1, 1]
 
@@ -75,7 +88,7 @@ def moveGhost(ghost, pos, arena):
 
     return distList
 
-def movePlayer(pos, arena):
+def movePlayer(pos, arena): #OLD
 
     distList = [1, 1, 1, 1]
     distList *= avoidGhosties(distList, pos, arena)
@@ -90,10 +103,20 @@ def runSimulation():
 
     gameover = False
 
+    #default game values
+    runcount = 1000
     row = 10
-    column = 10
+    column = row
+    ghostcount = 4
+    playercount = 1
+    positions = []
 
-    arena, positions = setupGame(row, column)
-    printBoard(arena, positions)
+    for x in range(runcount):
+
+        arena = setupArena(row, column)
+        positions = setupPositionsRandom(ghostcount, [], row, column)
+        positions = setupPositionsRandom(playercount, positions, row, column)
+
+        printBoard(arena, positions)
 
 runSimulation()
