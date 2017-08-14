@@ -46,9 +46,9 @@ def printBoard(arena, positions):
         #replaces the the dot or space for the character when needed
         for player in range(4):
             if positions[player][0] == x:
-                printrow = printrow[:positions[player][1]] + str(player) + printrow[positions[player][1]+1:]
+                printrow = printrow[:positions[player][1] * 2 + 1] + str(player) + printrow[positions[player][1] * 2 + 2:]
         if positions[4][0] == x:
-            printrow = printrow[:positions[player][1]] + 'P' + printrow[positions[player][1]+1:]
+            printrow = printrow[:positions[player][1] * 2 + 1] + 'P' + printrow[positions[player][1]*2 + 2:]
 
         #outputs the row to the console and then clears it
         print printrow
