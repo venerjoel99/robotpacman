@@ -20,7 +20,7 @@ def setupPositionsRandom(charactercount, positions, row, column):
 
         #generates a unique position in the row column matrix
         position = [[random.randint(0, row-1), random.randint(0, column-1)]]
-        while position in positions:
+        while position[0] in positions:
             position = [[random.randint(0, row-1), random.randint(0, column-1)]]
 
         #adds it to the rest of the positions
@@ -30,7 +30,17 @@ def setupPositionsRandom(charactercount, positions, row, column):
 
 def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
 
-    return
+    for g in range(charactercount):
+
+        #generates a unique nonadjacent position in the row column matrix
+        position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+        while position[0] in positions or [position[0][0] - 1, position[0][1]] in positions or [position[0][0] + 1, position[0][1]] in positions or [position[0][0], position[0][1] - 1] in positions or [position[0][0], position[0][1] + 1] in positions:
+              position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+
+        #adds it to the rest of the positions
+        positions = positions + position
+
+    return positions
 
 def setWallsRandom(wallpattern, arena):
 
@@ -55,17 +65,15 @@ def printBoard(arena, positions):
                 printrow = printrow + 'o'
 
         #replaces the the dot or space for the character when needed
-        for player in range(1,5):
+        for player in range(len(positions)):
             if positions[player][0] == x:
                 printrow = printrow[:positions[player][1] * 2 + 1] + str(player) + printrow[positions[player][1] * 2 + 2:]
-        if positions[0][0] == x:
-            printrow = printrow[:positions[player][1] * 2 + 1] + 'P' + printrow[positions[player][1]*2 + 2:]
 
         #outputs the row of dots + vertical walls to the console and then clears it
         print printrow
         printrow = ''
 
-        #parses rows for vhorizontal walls when needed
+        #parses rows for horizontal walls when needed
         for y in range(len(arena[0])):
             if arena[x][y][0]:
                 printrow = printrow + '  '
@@ -75,6 +83,9 @@ def printBoard(arena, positions):
         #outputs the row of hori to the console and then clears it
         print printrow
         printrow = ''
+
+    #separates this board from future boards
+    print '\n'
 
 def moveGhost(ghost, pos, arena): #OLD
 
@@ -104,7 +115,7 @@ def runSimulation():
     gameover = False
 
     #default game values
-    runcount = 1000
+    runcount = 100
     row = 10
     column = row
     ghostcount = 4
@@ -115,7 +126,7 @@ def runSimulation():
 
         arena = setupArena(row, column)
         positions = setupPositionsRandom(ghostcount, [], row, column)
-        positions = setupPositionsRandom(playercount, positions, row, column)
+        positions = setupPositionsRandomNonAdjacent(playercount, positions, row, column)
 
         printBoard(arena, positions)
 
