@@ -34,7 +34,11 @@ def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
 
         #generates a unique nonadjacent position in the row column matrix
         position = [[random.randint(0, row-1), random.randint(0, column-1)]]
-        while position[0] in positions or [position[0][0] - 1, position[0][1]] in positions or [position[0][0] + 1, position[0][1]] in positions or [position[0][0], position[0][1] - 1] in positions or [position[0][0], position[0][1] + 1] in positions:
+        while (position[0] in positions or
+        [position[0][0] - 1, position[0][1]] in positions or
+        [position[0][0] + 1, position[0][1]] in positions or
+        [position[0][0], position[0][1] - 1] in positions or
+        [position[0][0], position[0][1] + 1] in positions):
               position = [[random.randint(0, row-1), random.randint(0, column-1)]]
 
         #adds it to the rest of the positions
@@ -47,17 +51,27 @@ def setBorderWalls(arena):
     for border in range(len(arena)):
         arena[0][border][0] = False
         arena[border][0][2] = False
-        arena[9][border][1] = False
-        arena[border][9][3] = False
+        arena[len(arena) - 1][border][1] = False
+        arena[border][len(arena) - 1][3] = False
     return arena
 
 def setWallsRandom(arena, wallfrequency): #UNFINISHED
 
     for x in range(len(arena)):
-        for y in range(len(arena[0])):
-            #a possible random wall based on the wall frequency
+        for y in range(1, len(arena[0]) - 1):
+            #vertical wall based on the wall frequency
             if random.random() >= wallfrequency:
-                return arena
+                arena[x][y + 1][2] = False
+                arena[x][y - 1][3] = False
+
+    for x in range(1, len(arena) - 1):
+        for y in range(len(arena[0])):
+            #horizontal wall based on the wall frequency
+            if random.random() >= wallfrequency:
+                arena[x - 1][y][0] = False
+                arena[x + 1][y][1] = False
+
+    return arena
 
 def printBoard(arena, positions):
 
@@ -153,7 +167,7 @@ def runSimulation():
         positions = setupPositionsRandomNonAdjacent(playercount, positions, row, column)
 
         arena = setBorderWalls(arena)
-        #arena = setWallsRandom(arena, wallfrequency)
+        arena = setWallsRandom(arena, wallfrequency)
 
         printBoard(arena, positions)
 
