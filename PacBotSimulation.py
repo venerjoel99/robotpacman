@@ -48,25 +48,27 @@ def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
 
 def setBorderWalls(arena):
 
+    #adds all border walls for game bounding
     for border in range(len(arena)):
         arena[0][border][0] = False
         arena[border][0][2] = False
         arena[len(arena) - 1][border][1] = False
         arena[border][len(arena) - 1][3] = False
+
     return arena
 
 def setWallsRandom(arena, wallfrequency):
 
     for x in range(len(arena)):
         for y in range(len(arena[0]) - 1):
-            #vertical wall based on the wall frequency
+            #horizontal wall based on the frequency
             if random.random() >= wallfrequency:
                 arena[x][y + 1][2] = False
                 arena[x][y][3] = False
 
     for x in range(len(arena) - 1):
         for y in range(len(arena[0])):
-            #horizontal wall based on the wall frequency
+            #vertical wall based on the frequency
             if random.random() >= wallfrequency:
                 arena[x][y][1] = False
                 arena[x + 1][y][0] = False
@@ -75,15 +77,15 @@ def setWallsRandom(arena, wallfrequency):
 
 def removeIsolatingWalls(arena, maxwallcount):
 
-    wallcount = 0
-
     for x in range(len(arena)):
         for y in range(len(arena[x])):
 
+            #counts the walls
             wallcount = 0
             for z in range(len(arena[x][y])):
-                wallcount = wallcount + 1 - int(arena[x][y][z])
+                wallcount = wallcount + (1 - int(arena[x][y][z]))
 
+            #randomly removes walls until there are few enough for a dot not to be isolated
             while wallcount > maxwallcount:
                 removeside = random.randint(0,3)
 
@@ -92,35 +94,50 @@ def removeIsolatingWalls(arena, maxwallcount):
                     (not (y == 0 and removeside == 2)) and
                     (not (y == (len(arena[x]) - 1) and removeside == 3))):
 
+                    #remove the first instance of the wall reference
                     arena[x][y][removeside] = True
 
-                    #remove top wall of isolated point
                     if removeside == 0:
-                        #bottom wall
+                        #remove bottom wall second reference
                         arena[x - 1][y][1] = True
 
-                    #remove bottom wall of isolated point
                     elif removeside == 1:
+                        #remove top wall second reference
                         arena[x + 1][y][0] = True
 
-                    #remove left wall of isolated point
                     elif removeside == 2:
+                        #remove right wall second reference
                         arena[x][y - 1][3] = True
 
-                    #remove right wall of isolated point
                     elif removeside == 3:
+                        #remove left wall of isolated point
                         arena[x][y + 1][2] = True
 
+                    #recount walls for the while loop check
                     wallcount = 0
                     for z in range(len(arena[x][y])):
                         wallcount = wallcount + 1 - int(arena[x][y][z])
 
     return arena
 
-def printBoard(arena, positions):
+def eatDot(arena, positions, playercount):
+
+        for player in range(playercount):
+            arena[positions[player][0]][positions[player][1]][4] = False
+
+def moveCharacter(positions, directionlist, arena): #INCOMPLETE
+
+    return positions
+
+def gameOverCheck(positions):   #INCOMPLETE
+
+    return False
+
+def printBoard(arena, positions, ghostcount):
 
     printrow = ''
     wallcharacter = unichr(0x2588)
+    playercharacter = 'P'
 
     #adds border wall on the top
     for y in range(len(arena[0]) * 2 + 1):
@@ -148,8 +165,11 @@ def printBoard(arena, positions):
 
         #replaces the the dot or space for the character when needed
         for player in range(len(positions)):
-            if positions[player][0] == x:
+            if positions[player][0] == x and player < ghostcount:
                 printrow = printrow[:positions[player][1] * 2 + 1] + str(player) + printrow[positions[player][1] * 2 + 2:]
+            elif positions[player][0] == x:
+                printrow = printrow[:positions[player][1] * 2 + 1] + playercharacter + printrow[positions[player][1] * 2 + 2:]
+
 
         #outputs the row of dots + vertical walls to the console and then clears it
         print printrow
@@ -169,53 +189,44 @@ def printBoard(arena, positions):
     #separates this board from future boards
     print '\n'
 
-def moveGhost(ghost, pos, arena): #OLD
-
-    distList = [1, 1, 1, 1]
-
-    #STILL NEED TO ADD GHOST COLLISION PREVENTION
-
-    for ii in range(4):
-        if not arena[pos[ghostie][0]][pos[ghostie][1]][ii]:
-            distList[ii] = 0
-
-    return distList
-
-def movePlayer(pos, arena): #OLD
-
-    distList = [1, 1, 1, 1]
-    distList *= avoidGhosties(distList, pos, arena)
-
-    for ii in range(4):
-        if not arena[pos[4][0]][pos[4][1]][ii]:
-            distList[ii] = 0
-
-    return distList
-
 def runSimulation():
 
     gameover = False
 
     #default game values
     runcount = 100
-    row = 23
+    row =  23
     column = row
     ghostcount = 4
     playercount = 1
     positions = []
-    wallfrequency = 0
+    wallfrequency = 0.5
     maxwallcount = 2
 
     for x in range(runcount):
 
+        #sets up arena
         arena = setupArena(row, column)
+
+        #sets ghosts positions
         positions = setupPositionsRandom(ghostcount, [], row, column)
+
+        #sets player positions
         positions = setupPositionsRandomNonAdjacent(playercount, positions, row, column)
 
+        #sets standard borderwalls around the arena
         arena = setBorderWalls(arena)
+
+        #sets random walls in the arena
         arena = setWallsRandom(arena, wallfrequency)
+
+        #removes walls that isolate dots or obstruct a two way pathway
         arena = removeIsolatingWalls(arena, maxwallcount)
 
-        printBoard(arena, positions)
+        #removes dot based on where the player(s) position
+        eatDot(arena, positions, playercount)
+
+        #prints the board
+        printBoard(arena, positions, ghostcount)
 
 runSimulation()
