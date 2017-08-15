@@ -55,31 +55,76 @@ def setBorderWalls(arena):
         arena[border][len(arena) - 1][3] = False
     return arena
 
-def setWallsRandom(arena, wallfrequency): #UNFINISHED
+def setWallsRandom(arena, wallfrequency):
 
     for x in range(len(arena)):
-        for y in range(1, len(arena[0]) - 1):
+        for y in range(len(arena[0]) - 1):
             #vertical wall based on the wall frequency
             if random.random() >= wallfrequency:
                 arena[x][y + 1][2] = False
-                arena[x][y - 1][3] = False
+                arena[x][y][3] = False
 
-    for x in range(1, len(arena) - 1):
+    for x in range(len(arena) - 1):
         for y in range(len(arena[0])):
             #horizontal wall based on the wall frequency
             if random.random() >= wallfrequency:
-                arena[x - 1][y][0] = False
-                arena[x + 1][y][1] = False
+                arena[x][y][1] = False
+                arena[x + 1][y][0] = False
 
     return arena
+
+def removeIsolatingWalls(arena, maxwallcount):  #UNFINISHED
+
+    wallcount = 0
+
+    for x in range(len(arena)):
+        for y in range(len(arena[x])):
+
+            wallcount = 0
+            for z in range(len(arena[x][y])):
+                wallcount = wallcount + 1 - int(arena[x][y][z])
+
+            while wallcount > maxwallcount:
+                removeside = random.randint(0,3)
+
+                if ((not (x == 0 and removeside == 0)) and
+                    (not (x == (len(arena) - 1) and removeside == 1)) and
+                    (not (y == 0 and removeside == 2)) and
+                    (not (y == (len(arena[x]) - 1) and removeside == 3))):
+
+                    arena[x][y][removeside] = True
+
+                    #remove top wall of isolated point
+                    if removeside == 0:
+                        #bottom wall
+                        arena[x - 1][y][1] = True
+
+                    #remove bottom wall of isolated point
+                    elif removeside == 1:
+                        arena[x + 1][y][0] = True
+
+                    #remove left wall of isolated point
+                    elif removeside == 2:
+                        arena[x][y - 1][3] = True
+
+                    #remove right wall of isolated point
+                    elif removeside == 3:
+                        arena[x][y + 1][2] = True
+
+                    wallcount = 0
+                    for z in range(len(arena[x][y])):
+                        wallcount = wallcount + 1 - int(arena[x][y][z])
+
+        return arena
 
 def printBoard(arena, positions):
 
     printrow = ''
+    wallcharacter = unichr(0x2588)
 
     #adds border wall on the top
-    for y in range(len(arena[0])):
-        printrow = printrow + ' -'
+    for y in range(len(arena[0]) * 2 + 1):
+        printrow = printrow + wallcharacter
     print printrow
     printrow = ''
 
@@ -91,15 +136,15 @@ def printBoard(arena, positions):
             if arena[x][y][2]:
                 printrow = printrow + ' '
             else:
-                printrow = printrow + '|'
+                printrow = printrow + wallcharacter
 
             if arena[x][y][4]:
                 printrow = printrow + '.'
             else:
-                printrow = printrow + 'o'
+                printrow = printrow + ' '
 
         #adds border wall on right side
-        printrow = printrow + '|'
+        printrow = printrow + wallcharacter
 
         #replaces the the dot or space for the character when needed
         for player in range(len(positions)):
@@ -108,16 +153,16 @@ def printBoard(arena, positions):
 
         #outputs the row of dots + vertical walls to the console and then clears it
         print printrow
-        printrow = ''
+        printrow = wallcharacter
 
         #parses rows for horizontal walls when needed
         for y in range(len(arena[0])):
             if arena[x][y][1]:
-                printrow = printrow + '  '
+                printrow = printrow + ' ' + wallcharacter
             else:
-                printrow = printrow + ' -'
+                printrow = printrow + wallcharacter + wallcharacter
 
-        #outputs the row of hori to the console and then clears it
+        #outputs the row of horiontal walls to the console and then clears it
         print printrow
         printrow = ''
 
@@ -153,12 +198,13 @@ def runSimulation():
 
     #default game values
     runcount = 100
-    row = 10
+    row = 23
     column = row
     ghostcount = 4
     playercount = 1
     positions = []
-    wallfrequency = 0.5
+    wallfrequency = 0.8
+    maxwallcount = 2
 
     for x in range(runcount):
 
@@ -168,6 +214,7 @@ def runSimulation():
 
         arena = setBorderWalls(arena)
         arena = setWallsRandom(arena, wallfrequency)
+        #arena = removeIsolatingWalls(arena, maxwallcount)
 
         printBoard(arena, positions)
 
