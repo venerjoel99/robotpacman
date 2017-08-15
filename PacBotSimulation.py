@@ -73,7 +73,7 @@ def setWallsRandom(arena, wallfrequency):
 
     return arena
 
-def removeIsolatingWalls(arena, maxwallcount):  #UNFINISHED
+def removeIsolatingWalls(arena, maxwallcount):
 
     wallcount = 0
 
@@ -115,7 +115,7 @@ def removeIsolatingWalls(arena, maxwallcount):  #UNFINISHED
                     for z in range(len(arena[x][y])):
                         wallcount = wallcount + 1 - int(arena[x][y][z])
 
-        return arena
+    return arena
 
 def printBoard(arena, positions):
 
@@ -203,7 +203,7 @@ def runSimulation():
     ghostcount = 4
     playercount = 1
     positions = []
-    wallfrequency = 0.8
+    wallfrequency = 0
     maxwallcount = 2
 
     for x in range(runcount):
@@ -214,7 +214,7 @@ def runSimulation():
 
         arena = setBorderWalls(arena)
         arena = setWallsRandom(arena, wallfrequency)
-        #arena = removeIsolatingWalls(arena, maxwallcount)
+        arena = removeIsolatingWalls(arena, maxwallcount)
 
         printBoard(arena, positions)
 
