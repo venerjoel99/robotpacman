@@ -1,7 +1,8 @@
-x8  Ultrasonic Distance Sensors
+x5  Ultrasonic Distance Sensors
 x1  Raspberry Pi Zero
-x4  geared DC Motors
-x2  Dual H-Bridge (l293d)
+x1  Arduino Micro
+x2  geared DC Motors
+x1  Dual H-Bridge (l293d)
 x1  7.2V (2s) Li-Ion Battery
 x1  balance charger
-x1  5V regulator / power converter
+x1  5V regulator / UBEC

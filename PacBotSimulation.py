@@ -123,13 +123,42 @@ def removeIsolatingWalls(arena, maxwallcount):
 def eatDot(arena, positions, playercount):
 
         for player in range(playercount):
+            #dot is now false on the player location for all possible players
             arena[positions[player][0]][positions[player][1]][4] = False
 
-def moveCharacter(positions, directionlist, arena): #INCOMPLETE
+def moveCharacter(positions, directionlist, character, arena):  #NEEDS DEBUGGING / CHECKED FOR ACCURACY, ALSO NEEDS CHARACTER OVERLAP DETECTION AND WALL IMPLEMENTATIONS
 
-    return positions
+    for direction in directionlist:
 
-def gameOverCheck(positions):   #INCOMPLETE
+        #moves down unless it will go out of bounds
+        if direction == 0 and positions[character][1] > 0:
+            positions[character][1] = positions[character][1] - 1
+            return positions
+
+        #moves up unless it will go out of bounds
+        elif direction == 1 and positions[character][1] - 1 < len(arena[0]):
+            positions[character][1] = positions[character][1] + 1
+            return positions
+
+        #moves right unless it will go out of bounds
+        elif direction == 2 and positions[character][0] - 1 < len(arena):
+            positions[character][1] = positions[character][1] + 1
+            return positions
+
+        #moves left unless it will go out of bounds
+        elif direction == 3 and positions[character][0] > 0:
+            positions[character][1] = positions[character][1] - 1
+            return positions
+
+def gameOverCheck(positions, charactercount):   #NEEDS DEBUGGING / CHECKED FOR ACCURACY
+
+    for g in range(charactercount - 1):
+        if (position[0] in positions or
+        [position[len(positions) - 1][0] - 1, position[len(positions) - 1][1]] in positions or
+        [position[len(positions) - 1][0] + 1, position[len(positions) - 1][1]] in positions or
+        [position[len(positions) - 1][0], position[len(positions) - 1][1] - 1] in positions or
+        [position[len(positions) - 1][0], position[len(positions) - 1][1] + 1] in positions):
+            return True
 
     return False
 
@@ -189,6 +218,42 @@ def printBoard(arena, positions, ghostcount):
     #separates this board from future boards
     print '\n'
 
+def ghostLastVectorApproach(positions, character):
+
+    directionlist = []
+
+    #closer in the y direction
+    if (abs(positions[character][0] - positions[len(positions) - 1][0]) >=
+        abs(positions[character][1] - positions[len(positions) - 1][1])):
+
+        if positions[character][0] >= positions[len(positions) - 1][0]:
+            directionlist.append(0)
+        else:
+            directionlist.append(1)
+
+        if positions[character][1] >= positions[len(positions) - 1][1]:
+            directionlist.append(2)
+            directionlist.append(3)
+        else:
+            directionlist.append(3)
+            directionlist.append(2)
+
+    #closer in the x direction
+    else:
+        if positions[character][1] >= positions[len(positions) - 1][1]:
+            directionlist.append(2)
+        else:
+            directionlist.append(3)
+
+        if positions[character][0] >= positions[len(positions) - 1][0]:
+            directionlist.append(0)
+            directionlist.append(1)
+        else:
+            directionlist.append(1)
+            directionlist.append(0)
+
+    return directionlist
+
 def runSimulation():
 
     gameover = False
@@ -228,5 +293,22 @@ def runSimulation():
 
         #prints the board
         printBoard(arena, positions, ghostcount)
+
+        while not gameOverCheck(positions, playercount):
+
+                #removes dot based on where the player(s) position
+                eatDot(arena, positions, playercount)
+
+                #prints the board
+                printBoard(arena, positions, ghostcount)
+
+                for character in range(ghostcount):
+
+                    directionlist = ghostLastVectorApproach(positions, character)
+
+                    #moves the characters using the direction list map
+                    moveCharacter(positions, directionlist, character, arena)
+
+        print "\n\n\nGAME OVER"
 
 runSimulation()
