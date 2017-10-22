@@ -4,11 +4,16 @@
 
 class Game:
 
+	GHOST_KILL_POINTS=0 #need to find this value
+
 	def __init__(self, numGhosts, width,height):
 		self.pacman=Pacman() #initialize pacbot
 		self.ghosts=[Ghost() for i in range(numGhosts)] #initialize ghosts
 
 		self.maze=maze(width,height) #initialize maze
+		self.points=0
+
+		self.bigDotMode=False
 
 		for ghost in self.ghosts:
 			ghost.setPosition(self.maze) # set starting positions, may have to split this up to assign different starting locations to each
@@ -23,10 +28,16 @@ class Game:
 
 	def checkLoss(self):
 		for ghost in self.ghosts:
-			if ghost.getPosition()==pacman.getPosition():
+			if ghost.getPosition()==pacman.getPosition() and not self.bigDotMode:
 				return True
+			elif ghost.getPosition()==pacman.getPosition() and self.bigDotMode:
+				self.points+=GHOST_KILL_POINTS
+				ghost.kill()
 
 		return False
+
+	def bigDotCollected(self):
+		pass
 
 if __name__=="__main__":
 	Game game=Game(5,10,10)
