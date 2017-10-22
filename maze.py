@@ -16,19 +16,24 @@ class Maze:
         self.printBoard()
 
 
-    def setupPositionsRandom(self,charactercount, positions, row, column):
+    def hasDot(self,point):
+        return self.arena[point[0]][point[1]][-1]
 
-        for g in range(charactercount):
+    def removeDot(self,point):
+        self.arena[point[0]][point[1]][-1]=False
+    # def setupPositionsRandom(self,charactercount, positions, row, column):
 
-            #generates a unique position in the row column matrix
-            position = [[random.randint(0, row-1), random.randint(0, column-1)]]
-            while position[0] in positions:
-                position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+    #     for g in range(charactercount):
 
-            #adds it to the rest of the positions
-            positions = positions + position
+    #         #generates a unique position in the row column matrix
+    #         position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+    #         while position[0] in positions:
+    #             position = [[random.randint(0, row-1), random.randint(0, column-1)]]
 
-        return positions
+    #         #adds it to the rest of the positions
+    #         positions = positions + position
+
+    #     return positions
 
     def setupPositionsRandomNonAdjacent(self,charactercount, positions, row, column):
 
@@ -76,7 +81,7 @@ class Maze:
 
 
 
-    def removeIsolatingWalls(maxwallcount):
+    def removeIsolatingWalls(maxwallcount): #max number of adjacent walls to any tile
 
         for x in range(len(arena)):
             for y in range(len(arena[x])):
@@ -120,63 +125,61 @@ class Maze:
                             wallcount = wallcount + 1 - int(arena[x][y][z])
 
 
-    def printBoard(positions,ghostcount):
-        pass
-    # def printBoard(positions, ghostcount):
+    def printBoard(positions, ghostcount):
 
-    #     printrow = ''
-    #     wallcharacter = unichr(0x2588)
-    #     playercharacter = 'P'
+        printrow = ''
+        wallcharacter = unichr(0x2588)
+        playercharacter = 'P'
 
-    #     #adds border wall on the top
-    #     for y in range(len(arena[0]) * 2 + 1):
-    #         printrow = printrow + wallcharacter
-    #     print printrow
-    #     printrow = ''
+        #adds border wall on the top
+        for y in range(len(arena[0]) * 2 + 1):
+            printrow = printrow + wallcharacter
+        print printrow
+        printrow = ''
 
-    #     #iterates row-wise
-    #     for x in range(len(arena)):
+        #iterates row-wise
+        for x in range(len(arena)):
 
-    #         #parses rows for dots or spaces with vertical walls intersparced when needed
-    #         for y in range(len(arena[0])):
-    #             if arena[x][y][2]:
-    #                 printrow = printrow + ' '
-    #             else:
-    #                 printrow = printrow + wallcharacter
+            #parses rows for dots or spaces with vertical walls intersparced when needed
+            for y in range(len(arena[0])):
+                if arena[x][y][2]:
+                    printrow = printrow + ' '
+                else:
+                    printrow = printrow + wallcharacter
 
-    #             if arena[x][y][4]:
-    #                 printrow = printrow + '.'
-    #             else:
-    #                 printrow = printrow + ' '
+                if arena[x][y][4]:
+                    printrow = printrow + '.'
+                else:
+                    printrow = printrow + ' '
 
-    #         #adds border wall on right side
-    #         printrow = printrow + wallcharacter
+            #adds border wall on right side
+            printrow = printrow + wallcharacter
 
-    #         #replaces the the dot or space for the character when needed
-    #         for player in range(len(positions)):
-    #             if positions[player][0] == x and player < ghostcount:
-    #                 printrow = printrow[:positions[player][1] * 2 + 1] + str(player) + printrow[positions[player][1] * 2 + 2:]
-    #             elif positions[player][0] == x:
-    #                 printrow = printrow[:positions[player][1] * 2 + 1] + playercharacter + printrow[positions[player][1] * 2 + 2:]
+            #replaces the the dot or space for the character when needed
+            for player in range(len(positions)):
+                if positions[player][0] == x and player < ghostcount:
+                    printrow = printrow[:positions[player][1] * 2 + 1] + str(player) + printrow[positions[player][1] * 2 + 2:]
+                elif positions[player][0] == x:
+                    printrow = printrow[:positions[player][1] * 2 + 1] + playercharacter + printrow[positions[player][1] * 2 + 2:]
 
 
-    #         #outputs the row of dots + vertical walls to the console and then clears it
-    #         print printrow
-    #         printrow = wallcharacter
+            #outputs the row of dots + vertical walls to the console and then clears it
+            print printrow
+            printrow = wallcharacter
 
-    #         #parses rows for horizontal walls when needed
-    #         for y in range(len(arena[0])):
-    #             if arena[x][y][1]:
-    #                 printrow = printrow + ' ' + wallcharacter
-    #             else:
-    #                 printrow = printrow + wallcharacter + wallcharacter
+            #parses rows for horizontal walls when needed
+            for y in range(len(arena[0])):
+                if arena[x][y][1]:
+                    printrow = printrow + ' ' + wallcharacter
+                else:
+                    printrow = printrow + wallcharacter + wallcharacter
 
-    #         #outputs the row of horiontal walls to the console and then clears it
-    #         print printrow
-    #         printrow = ''
+            #outputs the row of horiontal walls to the console and then clears it
+            print printrow
+            printrow = ''
 
-    #     #separates this board from future boards
-    #     print '\n'
+        #separates this board from future boards
+        print '\n'
 
 
 if __name__=="__main__":

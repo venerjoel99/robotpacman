@@ -3,16 +3,17 @@ class Ghost:
 	START_LOCATION=(0,0) #likely to be changed
 
 	def __init__(self):
-		pass
+		self.setPosition(START_LOCATION)
 
 	def move(self,maze):
 		pass
 
 	def getPosition(self):
-		pass
+		return self.x,self.y
 
 	def setPosition(self,x,y): #only used at the beginning of the game
-		pass
+		self.x=x
+		self.y=y
 
 	def kill(self): #when pacman passes over a ghost after a big dot is collected
-		pass
+		self.setPosition(START_LOCATION)
