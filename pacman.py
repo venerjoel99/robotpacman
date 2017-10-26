@@ -14,6 +14,6 @@ For now, the entire maze is passed into it
 	def getPosition(self):
 		return self.x,self.y
 
-	def setPosition(self,x,y): #only used at the beginning of the game
+	def setPosition(self,x,y): #only used at the beginning of the game/between deaths
 		self.x=x
 		self.y=y
