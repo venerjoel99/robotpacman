@@ -1,4 +1,4 @@
-class pacman:
+class Pacman:
 
 	START_LOCATION=(0,0)
 
@@ -10,6 +10,10 @@ For now, the entire maze is passed into it
 '''
 	def move(self,maze):
 		pass
+
+'''
+
+'''
 
 	def getPosition(self):
 		return self.x,self.y

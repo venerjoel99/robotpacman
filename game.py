@@ -4,13 +4,15 @@
 
 class Game:
 
-	GHOST_KILL_POINTS=0 #need to find this value
-	BIG_DOT_COUNTER=30 #and this one, the amount of time a big dot lasts
-	DOT_POINTS=1
+	GHOST_KILL_POINTS_INITAL=200 #constant
+	ghost_kill_points=200 #changes when multiple ghosts are killed in a row
+	BIG_DOT_COUNTER=20
+	DOT_POINTS=10
+	BIG_DOT_POINTS=50
 
 	def __init__(self, numGhosts, width,height):
-		self.pacman=Pacman() #initialize pacbot
-		self.ghosts=[Ghost() for i in range(numGhosts)] #initialize ghosts
+		self.pacman=pacman() #initialize pacbot
+		self.ghosts=[ghost() for i in range(numGhosts)] #initialize ghosts
 
 		self.maze=maze(width,height) #initialize maze
 		self.points=0
@@ -30,6 +32,7 @@ class Game:
 
 		if bigDotTimeRemaining<=0:
 			self.bigDotMode=False
+			ghost_kill_points=GHOST_KILL_POINTS_INITAL
 		#print(self.maze)
 		return self.checkLoss() #return whether a loss has occurred so the simulation can stop
 
@@ -38,14 +41,16 @@ class Game:
 			if isAdjacent(ghost.getPosition(),pacman.getPosition()) and not self.bigDotMode:
 				return True
 			elif ghost.getPosition()==pacman.getPosition() and self.bigDotMode:
-				self.points+=GHOST_KILL_POINTS
+				self.points+=ghost_kill_points
 				ghost.kill()
+				ghost_kill_points*=2 #points awarded for each subsequent ghost killed are doubled until the time runs out
 
 		return False
 
 	def bigDotCollected(self):
 		self.bigDotMode=True
 		self.bigDotTimeRemaining=BIG_DOT_COUNTER #reset countdown clock for big dot
+		self.points+=BIG_DOT_POINTS
 
 
 	def checkDots(self):
@@ -57,11 +62,11 @@ class Game:
 		return (point1[0]-point2[0])**2 + (point1[1]-point2[0])**2<=1
 
 if __name__=="__main__":
-	Game game=Game(5,10,10)
+	game=Game(5,10,10)
 	gameOver=False
 
 
-	while(not gameOver):
+	while(not game.checkLoss()):
 		game.nextStep()
 		print(game.maze)
 
