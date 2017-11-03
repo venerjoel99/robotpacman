@@ -1,6 +1,11 @@
 
 #Top level class for simulating pacman game
 #Steven Fontanella
+from Pacman import Pacman
+from Maze import Maze
+from Ghost import Ghost
+
+
 
 class Game:
 
@@ -12,8 +17,8 @@ class Game:
 	NUM_GHOSTS=5
 
 	def __init__(self, numGhosts, width,height):
-		self.pacman=pacman() #initialize pacbot
-		self.ghosts=[ghost() for i in range(NUM_GHOSTS)] #initialize ghosts
+		self.pacman=Pacman() #initialize pacbot
+		self.ghosts=[Ghost() for i in range(NUM_GHOSTS)] #initialize ghosts
 
 		self.maze=maze(width,height) #initialize maze
 		self.points=0
