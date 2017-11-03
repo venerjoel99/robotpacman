@@ -9,10 +9,11 @@ class Game:
 	BIG_DOT_COUNTER=20
 	DOT_POINTS=10
 	BIG_DOT_POINTS=50
+	NUM_GHOSTS=5
 
 	def __init__(self, numGhosts, width,height):
 		self.pacman=pacman() #initialize pacbot
-		self.ghosts=[ghost() for i in range(numGhosts)] #initialize ghosts
+		self.ghosts=[ghost() for i in range(NUM_GHOSTS)] #initialize ghosts
 
 		self.maze=maze(width,height) #initialize maze
 		self.points=0

@@ -1,19 +1,19 @@
 import random
 
-
 class Maze:
+
 
 
     def __init__(self,row, column):
 
         # a location has 5 associated values: up, down, left, right linked and exsistence of a dot
         self.arena = [[[True for z in range(5)] for x in range(row)] for y in range(column)]
-        self.setupPositionsRandom()
-        positions=self.setupPositionsRandomNonAdjacent()
+        #self.setupPositionsRandom()
+        #self.positions=self.setupPositionsRandomNonAdjacent()
         self.setBorderWalls()
-        self.setWallsRandom()
-        self.removeIsolatingWalls()
-        self.printBoard()
+        self.setWallsRandom(.5)
+        self.removeIsolatingWalls(2)
+        #self.printBoard()
 
 
     def hasDot(self,point):
@@ -35,26 +35,26 @@ class Maze:
 
     #     return positions
 
-    def setupPositionsRandomNonAdjacent(self,charactercount, positions, row, column):
+    # def setupPositionsRandomNonAdjacent(self,charactercount, positions, row, column):
 
-        for g in range(charactercount):
+    #     for g in range(charactercount):
 
-            #generates a unique nonadjacent position in the row column matrix
-            position = [[random.randint(0, row-1), random.randint(0, column-1)]]
-            while (position[0] in positions or
-            [position[0][0] - 1, position[0][1]] in positions or
-            [position[0][0] + 1, position[0][1]] in positions or
-            [position[0][0], position[0][1] - 1] in positions or
-            [position[0][0], position[0][1] + 1] in positions):
-                  position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+    #         #generates a unique nonadjacent position in the row column matrix
+    #         position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+    #         while (position[0] in positions or
+    #         [position[0][0] - 1, position[0][1]] in positions or
+    #         [position[0][0] + 1, position[0][1]] in positions or
+    #         [position[0][0], position[0][1] - 1] in positions or
+    #         [position[0][0], position[0][1] + 1] in positions):
+    #               position = [[random.randint(0, row-1), random.randint(0, column-1)]]
 
-            #adds it to the rest of the positions
-            positions = positions + position
+    #         #adds it to the rest of the positions
+    #         positions = positions + position
 
-        return positions
+    #     return positions
 
     def setBorderWalls(self):
-
+        arena=self.arena
         #adds all border walls for game bounding
         for border in range(len(arena)):
             arena[0][border][0] = False
@@ -63,7 +63,8 @@ class Maze:
             arena[border][len(arena) - 1][3] = False
 
 
-    def setWallsRandom(wallfrequency):
+    def setWallsRandom(self,wallfrequency):
+        arena=self.arena
 
         for x in range(len(arena)):
             for y in range(len(arena[0]) - 1):
@@ -81,8 +82,9 @@ class Maze:
 
 
 
-    def removeIsolatingWalls(maxwallcount): #max number of adjacent walls to any tile
+    def removeIsolatingWalls(self,maxwallcount): #max number of adjacent walls to any tile
 
+        arena=self.arena
         for x in range(len(arena)):
             for y in range(len(arena[x])):
 
@@ -125,16 +127,17 @@ class Maze:
                             wallcount = wallcount + 1 - int(arena[x][y][z])
 
 
-    def printBoard(positions, ghostcount):
+    def printBoard(self,ghosts,pacbotPos): #ghosts is a list of ordered pairs of ghost positions
 
+        arena=self.arena
         printrow = ''
-        wallcharacter = unichr(0x2588)
+        wallcharacter = chr(0x2588)
         playercharacter = 'P'
 
         #adds border wall on the top
         for y in range(len(arena[0]) * 2 + 1):
             printrow = printrow + wallcharacter
-        print printrow
+        print(printrow)
         printrow = ''
 
         #iterates row-wise
@@ -156,15 +159,21 @@ class Maze:
             printrow = printrow + wallcharacter
 
             #replaces the the dot or space for the character when needed
-            for player in range(len(positions)):
-                if positions[player][0] == x and player < ghostcount:
-                    printrow = printrow[:positions[player][1] * 2 + 1] + str(player) + printrow[positions[player][1] * 2 + 2:]
-                elif positions[player][0] == x:
-                    printrow = printrow[:positions[player][1] * 2 + 1] + playercharacter + printrow[positions[player][1] * 2 + 2:]
+            for ghost in range(len(ghosts)):
+                #if arena[ghost[0],ghost[1]]
+                if ghosts[ghost][0] == x and ghost < len(ghosts):
+                    printrow = printrow[:ghosts[ghost][1] * 2 + 1] + str(ghost) + printrow[ghosts[ghost][1] * 2 + 2:]
+                elif ghosts[ghost][0] == x:
+                    printrow = printrow[:ghosts[ghost][1] * 2 + 1] + ghostcharacter + printrow[ghosts[ghost][1] * 2 + 2:]
+
+            if pacbotPos[0] == x:
+                printrow = printrow[:pacbotPos[1] * 2 + 1] + playercharacter + printrow[pacbotPos[1] * 2 + 2:]
+            elif ghosts[ghost][0] == x:
+                printrow = printrow[:pacbotPos[1] * 2 + 1] + playercharacter + printrow[pacbotPos[1] * 2 + 2:]
 
 
             #outputs the row of dots + vertical walls to the console and then clears it
-            print printrow
+            print(printrow)
             printrow = wallcharacter
 
             #parses rows for horizontal walls when needed
@@ -175,13 +184,13 @@ class Maze:
                     printrow = printrow + wallcharacter + wallcharacter
 
             #outputs the row of horiontal walls to the console and then clears it
-            print printrow
+            print(printrow)
             printrow = ''
 
         #separates this board from future boards
-        print '\n'
+        print()
 
 
 if __name__=="__main__":
     arena=Maze(10,10)
-    arena.printBoard()
+    arena.printBoard([[5,0],[6,5],[7,3]],[3,1])

@@ -8,7 +8,7 @@ class Pacman:
 '''the maze passed into this will eventually be the pacbot's representation of the maze (from what it has seen so far)
 For now, the entire maze is passed into it
 '''
-	def move(self,maze):
+	def move(self,maze,ghosts):
 		pass
 
 '''
