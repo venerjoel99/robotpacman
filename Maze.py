@@ -1,4 +1,5 @@
 import random
+from Tile import Tile
 
 class Maze:
 
@@ -6,8 +7,8 @@ class Maze:
 
     def __init__(self,row, column):
 
-        # a location has 5 associated values: up, down, left, right linked and exsistence of a dot
-        self.arena = [[[True for z in range(5)] for x in range(row)] for y in range(column)]
+        # a location has 5 associated values: up, down, left, right linked and existence of a dot
+        self.arena = [[Tile("Space") for x in range(row)] for y in range(column)]
         #self.setupPositionsRandom()
         #self.positions=self.setupPositionsRandomNonAdjacent()
         self.setBorderWalls()
@@ -17,10 +18,10 @@ class Maze:
 
 
     def hasDot(self,point):
-        return self.arena[point[0]][point[1]][-1]
+        return self.arena[point[0]][point[1]].hasDot()
 
     def removeDot(self,point):
-        self.arena[point[0]][point[1]][-1]=False
+        self.arena[point[0]][point[1]].removeDot()
     # def setupPositionsRandom(self,charactercount, positions, row, column):
 
     #     for g in range(charactercount):
@@ -54,13 +55,13 @@ class Maze:
     #     return positions
 
     def setBorderWalls(self):
-        arena=self.arena
+        arena=self.arena #shallow copy, used to reduce typing
         #adds all border walls for game bounding
         for border in range(len(arena)):
-            arena[0][border][0] = False
-            arena[border][0][2] = False
-            arena[len(arena) - 1][border][1] = False
-            arena[border][len(arena) - 1][3] = False
+            arena[0][border].uplinked = False
+            arena[border][0].leftlinked = False
+            arena[len(arena) - 1][border].downlinked = False
+            arena[border][len(arena) - 1].rightlinked = False
 
 
     def setWallsRandom(self,wallfrequency):
@@ -70,15 +71,15 @@ class Maze:
             for y in range(len(arena[0]) - 1):
                 #horizontal wall based on the frequency
                 if random.random() >= wallfrequency:
-                    arena[x][y + 1][2] = False
-                    arena[x][y][3] = False
+                    arena[x][y + 1].leftlinked = False
+                    arena[x][y].rightlinked = False
 
         for x in range(len(arena) - 1):
             for y in range(len(arena[0])):
                 #vertical wall based on the frequency
                 if random.random() >= wallfrequency:
-                    arena[x][y][1] = False
-                    arena[x + 1][y][0] = False
+                    arena[x][y].downlinked = False
+                    arena[x + 1][y].uplinked = False
 
 
 
@@ -91,7 +92,8 @@ class Maze:
                 #counts the walls
                 wallcount = 0
                 for z in range(len(arena[x][y])):
-                    wallcount = wallcount + (1 - int(arena[x][y][z]))
+                    link=(arena[x][y].uplinked,arena[x][y].downlinked,arena[x][y].leftlinked,arena[x][y].rightlinked)[z]
+                    wallcount = wallcount + (1 - link)
 
                 #randomly removes walls until there are few enough for a dot not to be isolated
                 while wallcount > maxwallcount:
@@ -103,28 +105,32 @@ class Maze:
                         (not (y == (len(arena[x]) - 1) and removeside == 3))):
 
                         #remove the first instance of the wall reference
-                        arena[x][y][removeside] = True
+                       # arena[x][y][removeside] = True
 
                         if removeside == 0:
+                            arena[x][y].uplinked=True
                             #remove bottom wall second reference
                             arena[x - 1][y][1] = True
 
                         elif removeside == 1:
+                            arena[x][y].downlinked=True
                             #remove top wall second reference
                             arena[x + 1][y][0] = True
 
                         elif removeside == 2:
+                            arena[x][y].leftlinked=True
                             #remove right wall second reference
                             arena[x][y - 1][3] = True
 
                         elif removeside == 3:
+                            arena[x][y].rightlinked=True
                             #remove left wall of isolated point
                             arena[x][y + 1][2] = True
 
                         #recount walls for the while loop check
                         wallcount = 0
                         for z in range(len(arena[x][y])):
-                            wallcount = wallcount + 1 - int(arena[x][y][z])
+                            wallcount = wallcount + 1 - int(link)
 
 
     def printBoard(self,ghosts,pacbotPos): #ghosts is a list of ordered pairs of ghost positions
@@ -159,17 +165,18 @@ class Maze:
             printrow = printrow + wallcharacter
 
             #replaces the the dot or space for the character when needed
-            for ghost in range(len(ghosts)):
-                #if arena[ghost[0],ghost[1]]
-                if ghosts[ghost][0] == x and ghost < len(ghosts):
-                    printrow = printrow[:ghosts[ghost][1] * 2 + 1] + str(ghost) + printrow[ghosts[ghost][1] * 2 + 2:]
+            if(ghosts):
+                for ghost in range(len(ghosts)):
+                    #if arena[ghost[0],ghost[1]]
+                    if ghosts[ghost][0] == x and ghost < len(ghosts):
+                        printrow = printrow[:ghosts[ghost][1] * 2 + 1] + str(ghost) + printrow[ghosts[ghost][1] * 2 + 2:]
+                    elif ghosts[ghost][0] == x:
+                        printrow = printrow[:ghosts[ghost][1] * 2 + 1] + ghostcharacter + printrow[ghosts[ghost][1] * 2 + 2:]
+            if(pacbotPos):
+                if pacbotPos[0] == x:
+                    printrow = printrow[:pacbotPos[1] * 2 + 1] + playercharacter + printrow[pacbotPos[1] * 2 + 2:]
                 elif ghosts[ghost][0] == x:
-                    printrow = printrow[:ghosts[ghost][1] * 2 + 1] + ghostcharacter + printrow[ghosts[ghost][1] * 2 + 2:]
-
-            if pacbotPos[0] == x:
-                printrow = printrow[:pacbotPos[1] * 2 + 1] + playercharacter + printrow[pacbotPos[1] * 2 + 2:]
-            elif ghosts[ghost][0] == x:
-                printrow = printrow[:pacbotPos[1] * 2 + 1] + playercharacter + printrow[pacbotPos[1] * 2 + 2:]
+                    printrow = printrow[:pacbotPos[1] * 2 + 1] + playercharacter + printrow[pacbotPos[1] * 2 + 2:]
 
 
             #outputs the row of dots + vertical walls to the console and then clears it
@@ -194,3 +201,6 @@ class Maze:
 if __name__=="__main__":
     arena=Maze(10,10)
     arena.printBoard([[5,0],[6,5],[7,3]],[3,1])
+    arena.removeDot([0,0])
+    arena.printBoard(None,None)
+    print(arena.hasDot([1,1]))
