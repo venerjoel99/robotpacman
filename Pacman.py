@@ -5,11 +5,23 @@ class Pacman:
 	def __init__(self):
 		self.setPosition(START_LOCATION)
 
+
 '''the maze passed into this will eventually be the pacbot's representation of the maze (from what it has seen so far)
 For now, the entire maze is passed into it
 '''
-	def move(self,maze,ghosts):
-		pass
+	def determineMove(self,maze,ghosts): #decide where to move
+
+
+
+
+
+
+
+
+	def move(self,maze,direction):
+		maze
+
+
 
 '''
 
