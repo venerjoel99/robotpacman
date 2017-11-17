@@ -1,3 +1,5 @@
+
+
 class Tile:
 
 
@@ -44,7 +46,8 @@ class Tile:
 
 	def removeDot(self):
 		self.dot=False
-		self.bigdog=False
+		self.bigdot=False
+
 
 	def __str__(self):
 		TYPECHARS={
@@ -63,5 +66,5 @@ class Tile:
 			return TYPECHARS[self.type]
 
 if __name__=="__main__":
-	t=Tile("Dot")
+	t=Tile("Wall")
 	print(t)

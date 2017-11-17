@@ -42,6 +42,8 @@ class Game:
 		#print(self.maze)
 		return self.checkLoss() #return whether a loss has occurred so the simulation can stop
 
+
+
 	def checkLoss(self):
 		for ghost in self.ghosts:
 			if isAdjacent(ghost.getPosition(),pacman.getPosition()) and not self.bigDotMode: #pacman killed
@@ -60,7 +62,7 @@ class Game:
 
 
 	def checkDots(self):
-		if self.maze.hasPoint(pacman.getPosition()):
+		if self.maze.hasDot(pacman.getPosition()):
 			self.points+=DOT_POINTS
 			self.maze.removeDot(pacman.getPosition())
 
