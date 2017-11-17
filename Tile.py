@@ -48,13 +48,12 @@ class Tile:
 		self.dot=False
 		self.bigdot=False
 
+
 	def __str__(self):
 		TYPECHARS={
 		"Wall":"█",
 		"Space":" ",
-		"Dot": "·",
-		"SpecialWall":"█",
-		"B":"B"}
+		"Dot": "."}
 
 		PACMAN="P"
 		GHOST="G"
@@ -69,4 +68,3 @@ class Tile:
 if __name__=="__main__":
 	t=Tile("Wall")
 	print(t)
-	#print("here is your checkmark: " + u'\u2713');
