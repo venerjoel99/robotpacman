@@ -46,15 +46,9 @@ class Game:
 
 	def checkLoss(self):
 		for ghost in self.ghosts:
-<<<<<<< HEAD
 			if Game.isAdjacent(ghost.getPosition(),self.pacman.getPosition()) and not self.bigDotMode:
 				return True
 			elif ghost.getPosition()==self.pacman.getPosition() and self.bigDotMode:
-=======
-			if isAdjacent(ghost.getPosition(),pacman.getPosition()) and not self.bigDotMode: #pacman killed
-				return True
-			elif ghost.getPosition()==pacman.getPosition() and self.bigDotMode: #ghost killed
->>>>>>> 680b10809596e92e9cd5247ad2aaf34a18f4d24e
 				self.points+=ghost_kill_points
 				ghost.kill()
 				ghost_kill_points*=2 #points awarded for each subsequent ghost killed are doubled until the time runs out

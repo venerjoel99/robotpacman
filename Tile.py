@@ -48,12 +48,8 @@ class Tile:
 		TYPECHARS={
 		"Wall":"█",
 		"Space":" ",
-<<<<<<< HEAD
 		"Dot": "·",
 		"Unknown" : "X"}
-=======
-		"Dot": "."}
->>>>>>> 680b10809596e92e9cd5247ad2aaf34a18f4d24e
 
 		PACMAN="P"
 		GHOST="G"
