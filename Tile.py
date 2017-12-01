@@ -24,11 +24,6 @@ class Tile:
 		self.dot=False
 		self.bigdot=False
 
-		self.uplinked=True
-		self.rightlinked=True
-		self.leftlinked=True
-		self.downlinked=True
-
 	def hasGhost(self):
 		return self.ghost
 
@@ -53,7 +48,12 @@ class Tile:
 		TYPECHARS={
 		"Wall":"█",
 		"Space":" ",
+<<<<<<< HEAD
+		"Dot": "·",
+		"Unknown" : "X"}
+=======
 		"Dot": "."}
+>>>>>>> 680b10809596e92e9cd5247ad2aaf34a18f4d24e
 
 		PACMAN="P"
 		GHOST="G"

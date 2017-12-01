@@ -3,10 +3,14 @@ class Ghost:
 	START_LOCATION=(0,0) #likely to be changed
 
 	def __init__(self):
-		self.setPosition(START_LOCATION)
+		x,y=Ghost.START_LOCATION
+		self.setPosition(x,y)
 
 	def move(self,maze):
-		pass
+		m=self.decidemove(maze)
+		maze.
+
+	def decidemove(self,maze):
 
 	def getPosition(self):
 		return self.x,self.y

@@ -2,19 +2,21 @@ from Tile import Tile
 from random import random,randint,seed
 import os
 from time import sleep
-class NewMaze:
+class Maze:
 
 
 
 	def __init__(self,x,y):
 		self.arena=[[Tile("Space") for row in range(y)] for col in range(x)]
+		if(x%2==0 or y%2==0):
+			raise Exception("Mazes  must have odd width and height")
 		self.x=x
 		self.y=y
 		self.freq=.5
 		self.pacmanPos=(1,1)
 		self.__setPacmanPos(1,1)
 		
-		seed(5)
+		#seed(5)
 
 		wallpositions=[]
 		for i in range(y): #set left and right walls
@@ -36,7 +38,7 @@ class NewMaze:
 
 		for i in range(1,self.x,2):
 			for j in range(1,self.y,2): #visit all odd tiles
-				print("x,y",i,j)
+				#print("x,y",i,j)
 				self.arena[i][j].type="Space"
 				#print("Tile:",i,j,"\n\n")
 				wallCount=0
@@ -55,14 +57,13 @@ class NewMaze:
 					if(not(i<=0 or j-1<=0 or i>=x-1 or j-1>=y-1)):
 						adjacentPositions.append((i,j-1))
 				if self.arena[i][j+1].getType()=="Wall":
-					print("this runs at",i,j)
 					wallCount+=1
 					if(not(i<=0 or j+1<=0 or i>=x-1 or j+1>=y-1)):
 						#print("a",i,j+1)
 						adjacentPositions.append((i,j+1))
 
 
-				print(adjacentPositions)
+				#print(adjacentPositions)
 
 				desiredWallCount=randint(2,2)
 				#print("Desired Walls",desiredWallCount)
@@ -144,7 +145,7 @@ class NewMaze:
 		return s
 
 if __name__=="__main__":
-	m=NewMaze(19,19)
+	m=Maze(19,19)
 	print(m)
 
 	moves=["right"]*6 +["down"]*2
@@ -152,6 +153,6 @@ if __name__=="__main__":
 	for move in moves:
 		sleep(1)
 		m.movepacman(move)
-		#os.system('cls')
+		os.system('cls')
 
 		print(m)
