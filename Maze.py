@@ -1,4 +1,5 @@
 from Tile import Tile
+from Path import navigate
 from random import random,randint,seed
 import os
 from time import sleep
@@ -147,12 +148,18 @@ class Maze:
 if __name__=="__main__":
 	m=Maze(19,19)
 	print(m)
-
-	moves=["right"]*6 +["down"]*2
-	#print(moves)
+	graph = []
+	#Test for Djikstra's algorithm
+	start = (1,1)
+	end = (17, 17)
+	for i in range(len(m.arena)):
+		for j in range(len(m.arena[0])):
+			if (m.arena[i][j]).getType()!="Wall":
+				graph.append((i,j))
+	moves = navigate(graph, start, end)
+	#moves=["right"]*6 +["down"]*2
 	for move in moves:
 		sleep(1)
 		m.movepacman(move)
 		os.system('cls')
-
 		print(m)
