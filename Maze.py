@@ -4,7 +4,7 @@ from random import random,randint,seed
 import os
 from time import sleep
 from Pacman import Pacman
-from Ghosts import Blinky,Pinky,Inky,Clyde,Ghost
+from Ghosts import Ghost, Blinky,Inky,Pinky,Clyde
 
 class Maze:
 

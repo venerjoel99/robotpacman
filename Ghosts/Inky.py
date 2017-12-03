@@ -4,9 +4,9 @@ from Path import navigate
 from Ghosts.Ghost import Ghost
 
 class Inky(Ghost):
-	pass
-	# def __init__(self):
-	# 	Ghost.__init__(self)
+
+	def __init__(self):
+	 	Ghost.__init__(self)
 
 	# def decideMove():
 	# 	pass

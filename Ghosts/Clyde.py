@@ -1,9 +1,12 @@
-from Ghost import Ghost
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from Path import navigate
+from Ghosts.Ghost import Ghost
 
 class Clyde(Ghost):
 
 	def __init__(self):
-		self.super()
+		Ghost.__init__(self)
 
 	def decideMove():
 		pass
