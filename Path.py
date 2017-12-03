@@ -81,7 +81,8 @@ def path(graph, source, destination):
 	
 	return result
 	
-def navigate(graph, source, destination):
+def navigate(maze, source, destination):
+	graph=maze.getGraph()
 	route = path(graph, source, destination)
 	directions = []
 	for i in range(len(route) - 1):

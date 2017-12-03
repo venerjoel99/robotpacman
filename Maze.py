@@ -3,6 +3,9 @@ from Path import navigate
 from random import random,randint,seed
 import os
 from time import sleep
+from Pacman import Pacman
+from Ghosts import Blinky,Pinky,Inky,Clyde,Ghost
+
 class Maze:
 
 
@@ -15,6 +18,7 @@ class Maze:
 		self.y=y
 		self.freq=.5
 		self.pacman=Pacman()
+		self.ghosts=[Blinky.Blinky(),Pinky.Pinky(),Inky.Inky(),Clyde.Clyde()]
 		self.__setPacmanPos(1,1)
 		
 		#seed(5)
@@ -135,6 +139,14 @@ class Maze:
 		else:
 			raise Exception("Tried to place pacman on a wall")
 
+	def getGraph(self):
+		nodes=[]
+		for i in range(1,self.x-1):
+			for j in range(1,self.y-1):
+				if self.arena[i][j].type!="Wall":
+					nodes.append((i,j))
+
+		return nodes
 
 	def __str__(self):
 		s=""
@@ -152,10 +164,7 @@ if __name__=="__main__":
 	#Test for Djikstra's algorithm
 	start = (1,1)
 	end = (17, 17)
-	for i in range(len(m.arena)):
-		for j in range(len(m.arena[0])):
-			if (m.arena[i][j]).getType()!="Wall":
-				graph.append((i,j))
+
 	moves = navigate(graph, start, end)
 	#moves=["right"]*6 +["down"]*2
 	for move in moves:

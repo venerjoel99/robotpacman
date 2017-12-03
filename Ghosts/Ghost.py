@@ -8,9 +8,10 @@ class Ghost:
 
 	def move(self,maze):
 		m=self.decidemove(maze)
-		maze.
+		#maze.
 
 	def decidemove(self,maze):
+		pass
 
 	def getPosition(self):
 		return self.x,self.y
@@ -21,3 +22,6 @@ class Ghost:
 
 	def kill(self): #when pacman passes over a ghost after a big dot is collected
 		self.setPosition(START_LOCATION)
+
+	def __str__(self):
+		return "G"
