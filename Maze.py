@@ -164,8 +164,7 @@ if __name__=="__main__":
 	#Test for Djikstra's algorithm
 	start = (1,1)
 	end = (17, 17)
-
-	moves = navigate(graph, start, end)
+	moves = navigate(m, start, end)
 	#moves=["right"]*6 +["down"]*2
 	for move in moves:
 		sleep(1)
