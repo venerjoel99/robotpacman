@@ -13,7 +13,7 @@ class Maze:
 		self.x=x
 		self.y=y
 		self.freq=.5
-		self.pacmanPos=(1,1)
+		self.pacman=Pacman()
 		self.__setPacmanPos(1,1)
 		
 		#seed(5)
