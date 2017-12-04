@@ -72,13 +72,11 @@ def path(graph, source, destination):
 				distance[node] = cost
 				prev[node] = current
 		distance.pop(current)
-	result = [destination]
-	if destination in prev:
-		x, y = destination
-		while prev[(x,y)] != None:
-			result = [prev[(x,y)]] + result[:]
-			x,y = prev[x,y]
-	
+	result = [current]
+	x, y = current
+	while prev[(x,y)] != None:
+		result = [prev[(x,y)]] + result[:]
+		x,y = prev[x,y]
 	return result
 	
 def navigate(maze, source, destination):

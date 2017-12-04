@@ -157,17 +157,47 @@ class Maze:
 
 		return s
 
+
+	def generateMap(self, file_name):
+		temp = []
+		fp = open(file_name, 'r')
+		for line in fp:
+			col = []
+			for char in line:
+				if char != '\n':
+					col.append(int(char))
+			size = len(temp)
+			if size > 0 and len(temp[size - 1]) != len(col):
+				raise Exception("Unequal rows")
+			else:
+				temp.append(col)
+		fp.close()
+		self.x = len(temp[0])
+		self.y = len(temp)
+		self.arena=[]
+		for i in range(len(temp[0])):
+			row = []
+			for j in range(len(temp)):
+				value = temp[j][i]
+				if value==1:
+					row.append(Tile('Wall'))
+				elif value==0:
+					row.append(Tile('Dot'))
+				elif value==2:
+					row.append(Tile('Space'))
+			self.arena.append(row)
+		self.__setPacmanPos(14,23)
 if __name__=="__main__":
 	m=Maze(19,19)
-	print(m)
-	graph = []
+	m.generateMap("map.txt")
 	#Test for Djikstra's algorithm
-	start = (1,1)
-	end = (17, 17)
+	start = (14,23)
+	end = (26,29)
 	moves = navigate(m, start, end)
+	print(m)
 	#moves=["right"]*6 +["down"]*2
 	for move in moves:
-		sleep(1)
+		sleep(.05)
 		m.movepacman(move)
 		os.system('cls')
 		print(m)
