@@ -4,7 +4,7 @@ from random import random,randint,seed
 import os
 from time import sleep
 from Pacman import Pacman
-from Ghosts import Ghost, Blinky,Inky,Pinky,Clyde
+from Ghosts import Ghost,Blinky,Inky,Pinky,Clyde
 
 class Maze:
 
@@ -145,7 +145,6 @@ class Maze:
 			for j in range(1,self.y-1):
 				if self.arena[i][j].type!="Wall":
 					nodes.append((i,j))
-
 		return nodes
 
 	def __str__(self):
@@ -175,6 +174,7 @@ class Maze:
 		self.x = len(temp[0])
 		self.y = len(temp)
 		self.arena=[]
+		start = 0,0
 		for i in range(len(temp[0])):
 			row = []
 			for j in range(len(temp)):
@@ -183,16 +183,18 @@ class Maze:
 					row.append(Tile('Wall'))
 				elif value==0:
 					row.append(Tile('Dot'))
-				elif value==2:
+				elif value==2 or value==3:
 					row.append(Tile('Space'))
+				if value==3:
+					start = i, j
 			self.arena.append(row)
-		self.__setPacmanPos(14,23)
+		self.__setPacmanPos(start[0], start[1])
 if __name__=="__main__":
 	m=Maze(19,19)
 	m.generateMap("map.txt")
-	#Test for Djikstra's algorithm
-	start = (14,23)
-	end = (26,29)
+	#Test for A* algorithm
+	start = m.pacmanPos
+	end = (100, 100)
 	moves = navigate(m, start, end)
 	print(m)
 	#moves=["right"]*6 +["down"]*2

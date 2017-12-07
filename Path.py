@@ -30,15 +30,26 @@ def length(a, b):
 	y = (b[1] - a[1])
 	return sqrt(x**2 + y**2)
 
-def min_distance(distances):
+def closest(destination, graph):
+	min = -1
+	result = 0,0
+	for v in graph:
+		dist = length(destination, v)
+		if min == -1 or dist < min:
+			min = dist
+			result = v
+	return result
+
+def min_distance(distances, destination):
 	min = -1
 	vertex = None
 	for v in distances:
 		if distances[v] == -1:
 			continue
-		if min == -1 or distances[v] < min:
+		f_cost = distances[v] + length(v, destination)
+		if min == -1 or f_cost < min:
 			vertex = v
-			min = distances[v]
+			min = f_cost
 	return vertex
 	
 def neighbors(graph, vertex):
@@ -64,7 +75,7 @@ def path(graph, source, destination):
 			distance[vertex] = -1
 	current = None
 	while len(distance) > 0 and current!= destination:
-		current = min_distance(distance)
+		current = min_distance(distance, destination)
 		min = -1
 		for node in neighbors(distance, current):
 			cost = distance[current] + 1
@@ -72,6 +83,8 @@ def path(graph, source, destination):
 				distance[node] = cost
 				prev[node] = current
 		distance.pop(current)
+	if destination not in prev:
+		current = closest(destination, prev)
 	result = [current]
 	x, y = current
 	while prev[(x,y)] != None:
