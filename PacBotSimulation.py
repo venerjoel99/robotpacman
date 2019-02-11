@@ -1,12 +1,34 @@
 #!/usr/bin/env python
 
 #This code is a simulation and code base for the PennState robotics club
-#entry into the Harvard PacMan robotics competition. Code written by:
-#Geoffrey Billy
-#Saimun Shahee
+#entry into the Harvard PacMan robotics competition. 
+
+#Code based on original code @gcb5083/robotpacman by: Geoffrey Billy and Saimun Shahee
 
 import random
 import enum
+
+class Position(object):
+    """
+    a class to represent a specific x,y location
+    """
+    def __init__(self, x, y):
+        super(Position, self).__init__()
+        
+        self.x = x
+        self.y = y
+
+    def getX(self):
+        return self.x
+    def getY(self):
+        return self.y
+
+    def setX(self, x):
+        self.x = x
+    def setY(self, y):
+        self.y = y
+
+    
 
 class ARENA_BIT_MASK(enum.Enum):
     RIGHT = 0
@@ -15,29 +37,165 @@ class ARENA_BIT_MASK(enum.Enum):
     DOWN = 3
     DOT = 4
 
-def setupArena(row, column):
+class ConnectivityMask(object):
     """
-    sets up the the arena, as a 5 bit mask at each x,y coordinate representing the presence of adjacent coordinate positions and the bit for the existance of a dot(pac bot dot to eat)
+    A class representing for each tile the connections that each tile make to one another.
+    From this tile can another tile be directly reached. Also if a dot is still present here
 
-    Parameters
-    ----------
-    row : integer
-        how many rows are in the arena
-    column : integer
-        how many columns are in the arena
+    """
+    def __init__(self):
+        super(ConnectivityMask, self).__init__()
+        self.right = True
+        self.left = True
+        self.up = True
+        self.down = True
+        self.containFood = True
 
-    Returns
-    -------
-    arena : List 3 dim
-        an arena of the binary list at each coordinate location <x,y>
+    def removeFood(self):
+        """
+        mutator function to remove the food from the tile when pacbot eats it
+        """
+        self.containFood = False
+
+    def canGoRight(self):
+        return self.right
+
+    def canGoLeft(self):
+        return self.left
+
+    def canGoDown(self):
+        return self.down
+
+    def canGoUp(self):
+        return self.up
+    
+    def isFoodPresent(self):
+        return self.containFood
+
+    def setLeft(self, left):
+        self.left = left
+
+    def setRight(self, right):
+        self.right = right
+
+    def setUp(self, up):
+        self.up = up
+
+    def setDown(self, down):
+        self.down = down
+
+
+
+class Arena(object):
+    """
+    A 2 - dim array of conenctivity masks representing a connecitivity mask at each coordinate of the maze
+
+    (x,y) are represented from origin (0,0) at bottom-left
+    (col, row) are represented from origin (0,0) at top-left
     """
 
-    # a location has 5 associated values: up, down, left, right linked and exsistence of a dot
-    connectivityMap = lambda : [True for i in range(5)]
-    rowMap = lambda : [connectivityMap() for i in range(row)]
-    fullMap = lambda : [rowMap() for i in range(column)]
+    def __init__(self, row, col):
+    
+        """
+        sets up the the arena (2-dim list <ConnectivityMask>)
 
-    return fullMap()
+        Parameters
+        ----------
+        row : integer
+            how many rows are in the arena
+        column : integer
+            how many columns are in the arena
+
+        """
+
+        # a location has 5 associated values: up, down, left, right linked and exsistence of a dot
+        rowMap = lambda : [ConnectivityMask() for i in range(row)]
+        fullMap = lambda : [rowMap() for i in range(col)]
+
+        super(Arena, self).__init__()
+        self.rows = row
+        self.cols = col
+        self.maze = fullMap()
+
+    def buildWallBetween(self, pos1, pos2):
+        """
+
+        a mutator function to prevent 2 directly adjacent connectivity mask positions from being able to connect
+        to one another. (i.e. a wall that sperates the 2)
+
+        Preconditions:
+        --------------
+        under the presumption that the 2 positions are directly adjacent
+
+        either vertically directly ontop each other OR horizontally right next to eachother
+               BUT not diagonally away from each other
+
+        Parameters:
+        -----------
+        pos1 : Position
+            position of the first ConnectivityMask to block
+        pos2 : Position
+            position of the second ConnectivityMask to block
+
+        """
+        row1 = self.rows - pos1.getY() - 1
+        col1 = pos1.getX()
+
+        row2 = self.rows - pos2.getY() - 1
+        col2 = pos2.getX()
+
+        if(row1 == row2):
+            sharedRow = row1
+            col_lst = [col1, col2]
+            col_lst.sort()
+            smallerCol, largerCol = col_lst
+
+            self.maze[smallerCol][sharedRow].setRight(False)
+            self.maze[largerCol][sharedRow].setLeft(False)
+
+        else: # col1 == col2
+            sharedCol = col1
+            row_lst = [row1, row2]
+            row_lst.sort()
+            smallerRow, largerRow = row_lst
+
+            self.maze[sharedCol][smallerRow].setDown(False)
+            self.maze[sharedCol][largerRow].setUp(False)
+
+    def initalizeBoundryWall(self):
+        """
+        assigns the adjacent neighbors for the binary mask in the edge coordinates of the arena map
+
+        Parmaeters:
+        -----------
+        arena : List <Dim 3>
+            the arena connected binary mask to assign side of edge without neighbors
+
+        Returns:
+        arena : List <Dim 3>
+            the arena after all coordinates who cannot have neighbors have been assigned
+        """
+
+        for col in range(self.cols):
+            topRow = 0
+            bottomRow = self.rows-1
+
+            self.maze[col][topRow].setUp(False)
+            self.maze[col][bottomRow].setDown(False)
+
+        for row in range(self.rows):
+            leftCol = 0
+            rightCol = self.cols-1
+
+            self.maze[leftCol][row].setLeft(False)
+            self.maze[rightCol][row].setRight(False)
+
+    def getRows(self):
+        return self.rows
+
+    def getCols(self):
+        return self.cols
+
 
 def setupPositionsRandom(charactercount, positions, row, column):
 
@@ -129,47 +287,6 @@ def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
 
     return positions
 
-def setBorderWalls(arena):
-
-    """
-    assigns the adjacnet neighbors for the binary mask in the edge coordinates of the arena map
-
-    Parmaeters:
-    -----------
-    arena : List <Dim 3>
-        the arena connected binary mask to assign side of edge without neighbors
-
-    Returns:
-    arena : List <Dim 3>
-        the arena after all coordinates who cannot have neighbors have been assigned
-    """
-
-    def setFalse(maskID):
-        col = maskID[0]
-        row = maskID[1]
-        maskIndex = maskID[2]
-        arena[col][row][maskIndex] = False
-
-    def getMaskID(col, row, maskIndex):
-        return [col, row, maskIndex]
-
-    lastRow = len(arena[0])-1
-    lastCol = len(arena)-1
-
-    #adds all border walls for game bounding
-    for i in range(len(arena)):
-
-        leftBorder = getMaskID(col=0, row=i, maskIndex=ARENA_BIT_MASK.LEFT.value)
-        topBorder = getMaskID(col=i, row=0,  maskIndex=ARENA_BIT_MASK.UP.value)
-        rightBorder = getMaskID(col=lastCol ,row=i, maskIndex=ARENA_BIT_MASK.RIGHT.value)
-        bottomBorder = getMaskID(col=i, row=lastRow, maskIndex=ARENA_BIT_MASK.DOWN.value)
-
-        setFalse(leftBorder)
-        setFalse(topBorder)
-        setFalse(bottomBorder)
-        setFalse(rightBorder)
-        
-    return arena
 
 def setWallsRandom(arena, wallfrequency):
 
@@ -186,25 +303,32 @@ def setWallsRandom(arena, wallfrequency):
 
     shouldBuildWall = lambda : random.random() >= wallfrequency
 
-    for col in range(len(arena)):
-        for row in range(len(arena[0]) - 1):
+    for col in range(arena.getCols()):
+        rows_with_row_below = arena.getRows() -1
+        for row in range(rows_with_row_below):
             #horizontal walls between 2 tiles based on frequency
             if shouldBuildWall():
-                currTile = arena[col][row]
-                topTile = arena[col][row+1]
+                xLoc = col
+                yLoc = arena.getRows() - row - 1
 
-                topTile[ARENA_BIT_MASK.DOWN.value] = False
-                currTile[ARENA_BIT_MASK.UP.value] = False
+                currTile = Position(xLoc, yLoc)
+                belowTile = Position(xLoc, yLoc - 1)
 
-    for col in range(len(arena) - 1):
-        for row in range(len(arena[0])):
+                arena.buildWallBetween(currTile, belowTile)
+
+    cols_with_right_col = arena.getCols() - 1
+
+    for col in range(cols_with_right_col):
+        for row in range(arena.getRows()):
             #vertical wall between 2 tiles based on the frequency
             if shouldBuildWall():
-                currTile = arena[col][row]
-                rightTile = arena[col+1][row]
+                xLoc = col
+                yLoc = arena.getRows() - row - 1
+                
+                currTile = Position(xLoc, yLoc)
+                rightTile = Position(xLoc + 1, yLoc)
 
-                currTile[ARENA_BIT_MASK.RIGHT.value] = False
-                rightTile[ARENA_BIT_MASK.LEFT.value] = False
+                arena.buildWallBetween(currTile, rightTile)
 
     return arena
 
@@ -225,8 +349,11 @@ def removeIsolatingWalls(arena, maxwallcount):
     arena bit list, dot attribute is default True???. Otherwise we may need to change wall count to dis-include it
     """
 
-    for col in range(len(arena)):
-        for row in range(len(arena[col])):
+    for col in range(arena.getCols()):
+        for row in range(arena.getRows()):
+
+            x = col
+            y = row
 
             #counts the walls
             wallcount = 0
@@ -242,7 +369,7 @@ def removeIsolatingWalls(arena, maxwallcount):
             while wallcount > maxwallcount:
                 removeside = random.randint(0,3)
 
-                if ((not (x == 0 and removeside == 0)) and
+                if ((not (x == 0 and removeside == 0)) and  # only remove if that side is not the boundry wall
                     (not (x == (len(arena) - 1) and removeside == 1)) and
                     (not (y == 0 and removeside == 2)) and
                     (not (y == (len(arena[x]) - 1) and removeside == 3))):
@@ -464,4 +591,4 @@ def runSimulation():
 
         print "\n\n\nGAME OVER"
 
-runSimulation()
+#runSimulation()
