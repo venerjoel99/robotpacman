@@ -6,40 +6,123 @@
 #Saimun Shahee
 
 import random
+import enum
+
+class ARENA_BIT_MASK(enum.Enum):
+    RIGHT = 0
+    LEFT = 1
+    UP = 2
+    DOWN = 3
+    DOT = 4
 
 def setupArena(row, column):
+    """
+    sets up the the arena, as a 5 bit mask at each x,y coordinate representing the presence of adjacent coordinate positions and the bit for the existance of a dot(pac bot dot to eat)
+
+    Parameters
+    ----------
+    row : integer
+        how many rows are in the arena
+    column : integer
+        how many columns are in the arena
+
+    Returns
+    -------
+    arena : List 3 dim
+        an arena of the binary list at each coordinate location <x,y>
+    """
 
     # a location has 5 associated values: up, down, left, right linked and exsistence of a dot
-    arena = [[[True for z in range(5)] for x in range(row)] for y in range(column)]
+    connectivityMap = lambda : [True for i in range(5)]
+    rowMap = lambda : [connectivityMap() for i in range(row)]
+    fullMap = lambda : [rowMap() for i in range(column)]
 
-    return arena
+    return fullMap()
 
 def setupPositionsRandom(charactercount, positions, row, column):
 
-    for g in range(charactercount):
+    """
+    given a set of positions add a given number of new position that is not already in the list, and add it into the list. New unique position are selected randomly.
 
-        #generates a unique position in the row column matrix
-        position = [[random.randint(0, row-1), random.randint(0, column-1)]]
-        while position[0] in positions:
-            position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+    Parameters:
+    -----------
+    charactercount : int
+        number of positions to append to the positions list
+    positions: list<positions>
+        a list of the existing positions to append new position into
+    row : int
+        the limit for the row count which positions can be choosen randomly from
+    column : int
+        the limit for the column count which position can be choosen randomly from
+
+    Returns:
+    --------
+    positions : list<position>
+        a list of positions with added positions appended to the end of it
+    """
+    randomCol = lambda : random.randint(0, column-1)
+    randomRow = lambda : random.randint(0, row-1)
+
+    randomlyMakePosition = lambda : [randomRow(), randomCol()]
+
+    notUnique = lambda position: position in positions
+
+    for x in range(charactercount):
+        nextPosition = [randomlyMakePosition()]
+
+        while notUnique(nextPosition[0]): 
+            nextPosition = [randomlyMakePosition()]
 
         #adds it to the rest of the positions
-        positions = positions + position
+        positions = positions + nextPosition
 
     return positions
 
 def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
 
+    """
+    
+    given a set of positions add a given number of new position that is unique not already in the list and not adjacent (not including diagonal) to an existing item in the list, and add it into the list. New unique position are selected randomly.
+
+    Parameters:
+    -----------
+    charactercount : int
+        number of positions to append to the positions list
+    positions: list<positions>
+        a list of the existing positions to append new position into
+    row : int
+        the limit for the row count which positions can be choosen randomly from
+    column : int
+        the limit for the column count which position can be choosen randomly from
+
+    Returns:
+    --------
+    positions : list<position>
+        a list of positions with added positions appended to the end of it
+    """
+
+    randomCol = lambda : random.randint(0, column-1)
+    randomRow = lambda : random.randint(0, row-1)
+
+    randomlyMakePosition = lambda : [randomRow(), randomCol()]
+
+    notUnique = lambda position: position in positions
+
+    def getAdjacent(x,y):
+        return [x-1,y], [x+1,y], [x,y-1], [x,y+1]
+
     for g in range(charactercount):
 
         #generates a unique nonadjacent position in the row column matrix
-        position = [[random.randint(0, row-1), random.randint(0, column-1)]]
-        while (position[0] in positions or
-        [position[0][0] - 1, position[0][1]] in positions or
-        [position[0][0] + 1, position[0][1]] in positions or
-        [position[0][0], position[0][1] - 1] in positions or
-        [position[0][0], position[0][1] + 1] in positions):
-              position = [[random.randint(0, row-1), random.randint(0, column-1)]]
+        position = [randomlyMakePosition()]
+        
+        inPosition = lambda pos : pos in positions
+
+        xPos = position[0][0]
+        yPos = position[0][1]
+
+        while ( notUnique(position[0]) or True in map(inPosition, getAdjacent(xPos, yPos)) ):
+              position = [randomlyMakePosition()]
 
         #adds it to the rest of the positions
         positions = positions + position
@@ -48,42 +131,112 @@ def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
 
 def setBorderWalls(arena):
 
-    #adds all border walls for game bounding
-    for border in range(len(arena)):
-        arena[0][border][0] = False
-        arena[border][0][2] = False
-        arena[len(arena) - 1][border][1] = False
-        arena[border][len(arena) - 1][3] = False
+    """
+    assigns the adjacnet neighbors for the binary mask in the edge coordinates of the arena map
 
+    Parmaeters:
+    -----------
+    arena : List <Dim 3>
+        the arena connected binary mask to assign side of edge without neighbors
+
+    Returns:
+    arena : List <Dim 3>
+        the arena after all coordinates who cannot have neighbors have been assigned
+    """
+
+    def setFalse(maskID):
+        col = maskID[0]
+        row = maskID[1]
+        maskIndex = maskID[2]
+        arena[col][row][maskIndex] = False
+
+    def getMaskID(col, row, maskIndex):
+        return [col, row, maskIndex]
+
+    lastRow = len(arena[0])-1
+    lastCol = len(arena)-1
+
+    #adds all border walls for game bounding
+    for i in range(len(arena)):
+
+        leftBorder = getMaskID(col=0, row=i, maskIndex=ARENA_BIT_MASK.LEFT.value)
+        topBorder = getMaskID(col=i, row=0,  maskIndex=ARENA_BIT_MASK.UP.value)
+        rightBorder = getMaskID(col=lastCol ,row=i, maskIndex=ARENA_BIT_MASK.RIGHT.value)
+        bottomBorder = getMaskID(col=i, row=lastRow, maskIndex=ARENA_BIT_MASK.DOWN.value)
+
+        setFalse(leftBorder)
+        setFalse(topBorder)
+        setFalse(bottomBorder)
+        setFalse(rightBorder)
+        
     return arena
 
 def setWallsRandom(arena, wallfrequency):
 
-    for x in range(len(arena)):
-        for y in range(len(arena[0]) - 1):
-            #horizontal wall based on the frequency
-            if random.random() >= wallfrequency:
-                arena[x][y + 1][2] = False
-                arena[x][y][3] = False
+    """
+    randomly assigns certain tiles where verticle or horizontal movement is blocked (i.e. generate walls above/below or left/right) of the tileand on the other side of the wall to assign a wall on an adjacent tile's respectively opposite side
 
-    for x in range(len(arena) - 1):
-        for y in range(len(arena[0])):
-            #vertical wall based on the frequency
-            if random.random() >= wallfrequency:
-                arena[x][y][1] = False
-                arena[x + 1][y][0] = False
+    Parameters
+    ----------
+    arena : List <dim 3>
+        the bit mask telling the connection information at each coordinate which can be move into
+    wallfrequency : float
+        an index to indicate the unliklihood for a wall to appear
+    """
+
+    shouldBuildWall = lambda : random.random() >= wallfrequency
+
+    for col in range(len(arena)):
+        for row in range(len(arena[0]) - 1):
+            #horizontal walls between 2 tiles based on frequency
+            if shouldBuildWall():
+                currTile = arena[col][row]
+                topTile = arena[col][row+1]
+
+                topTile[ARENA_BIT_MASK.DOWN.value] = False
+                currTile[ARENA_BIT_MASK.UP.value] = False
+
+    for col in range(len(arena) - 1):
+        for row in range(len(arena[0])):
+            #vertical wall between 2 tiles based on the frequency
+            if shouldBuildWall():
+                currTile = arena[col][row]
+                rightTile = arena[col+1][row]
+
+                currTile[ARENA_BIT_MASK.RIGHT.value] = False
+                rightTile[ARENA_BIT_MASK.LEFT.value] = False
 
     return arena
 
 def removeIsolatingWalls(arena, maxwallcount):
+    
+    """
+    keeps removing walls until walls which causes certain regions to be completly boxed in from the rest of the maze are removed
 
-    for x in range(len(arena)):
-        for y in range(len(arena[x])):
+    Parameters:
+    -----------
+    arena : List <dim 3>
+        the bit mask list mapped to each coordinate location to determine connectivity between coordinate locations
+    maxwallcount: int
+        maximum number of walls surronding a given tile before it can be classified as an isolated tile
+
+    Precondition:(not certain)
+    -------------
+    arena bit list, dot attribute is default True???. Otherwise we may need to change wall count to dis-include it
+    """
+
+    for col in range(len(arena)):
+        for row in range(len(arena[col])):
 
             #counts the walls
             wallcount = 0
-            for z in range(len(arena[x][y])):
-                wallcount = wallcount + (1 - int(arena[x][y][z]))
+            for bit_index in range(len(arena[col][row])):
+                if(arena[col][row][bit_index]):
+                    wallPresent = 0
+                else:
+                    wallPresent = 1
+
+                wallcount += wallPresent
 
             #randomly removes walls until there are few enough for a dot not to be isolated
             while wallcount > maxwallcount:
