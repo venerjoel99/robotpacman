@@ -125,7 +125,7 @@ class TestArena(unittest.TestCase):
         self.assertEqual(col, 3)
         self.assertEqual(row, 10)
 
-    def test_buildWallBetween_horizontal(self):
+    def test_changeRelationBetween_horizontal(self):
         x = 2
         y = 7
 
@@ -137,12 +137,12 @@ class TestArena(unittest.TestCase):
         self.assertEqual(arena.getMask(x,y  ,"xy").canGoDown(), True)
         self.assertEqual(arena.getMask(x,y-1,"xy").canGoUp(), True)
 
-        arena.buildWallBetween(pos1, pos2)
+        arena.changeRelationBetween(pos1, pos2)
 
         self.assertEqual(arena.getMask(x,y  ,"xy").canGoDown(), False)
         self.assertEqual(arena.getMask(x,y-1,"xy").canGoUp(), False)
 
-    def test_buildWallBetween_horizontal_order_independent(self):
+    def test_changeRelationBetween_horizontal_order_independent(self):
         x = 2
         y = 7
 
@@ -154,12 +154,12 @@ class TestArena(unittest.TestCase):
         self.assertEqual(arena.getMask(x,y  ,"xy").canGoDown(), True)
         self.assertEqual(arena.getMask(x,y-1,"xy").canGoUp(), True)
 
-        arena.buildWallBetween(pos2, pos1)
+        arena.changeRelationBetween(pos2, pos1)
 
         self.assertEqual(arena.getMask(x,y  ,"xy").canGoDown(), False)
         self.assertEqual(arena.getMask(x,y-1,"xy").canGoUp(), False)
 
-    def test_buildWallBetween_verticle(self):
+    def test_changeRelationBetween_verticle(self):
         x = 2
         y = 7
 
@@ -171,12 +171,12 @@ class TestArena(unittest.TestCase):
         self.assertEqual(arena.getMask(x  ,y,"xy").canGoRight(), True)
         self.assertEqual(arena.getMask(x+1,y,"xy").canGoLeft(), True)
         
-        arena.buildWallBetween(pos1, pos2)
+        arena.changeRelationBetween(pos1, pos2)
 
         self.assertEqual(arena.getMask(x  ,y,"xy").canGoRight(), False)
         self.assertEqual(arena.getMask(x+1,y,"xy").canGoLeft(), False)
 
-    def test_buildWallBetween_verticle_order_independent(self):
+    def test_changeRelationBetween_verticle_order_independent(self):
         x = 2
         y = 7
 
@@ -188,7 +188,7 @@ class TestArena(unittest.TestCase):
         self.assertEqual(arena.getMask(x  ,y,"xy").canGoRight(), True)
         self.assertEqual(arena.getMask(x+1,y,"xy").canGoLeft(), True)
         
-        arena.buildWallBetween(pos2, pos1)
+        arena.changeRelationBetween(pos2, pos1)
 
         self.assertEqual(arena.getMask(x  ,y,"xy").canGoRight(), False)
         self.assertEqual(arena.getMask(x+1,y,"xy").canGoLeft(), False)
@@ -277,6 +277,90 @@ class TestArena(unittest.TestCase):
         self.assertNotEqual(arena4, arena1)
 
 
+class TestSimulationFunctions(unittest.TestCase):
+    def __init__(self, *args, **argw):
+        super(TestSimulationFunctions, self).__init__(*args, **argw)
+
+    def test_setupPositionsRandom(self):
+        arena = PacBotSimulation.Arena(1,2)
+
+        pos_lst = [PacBotSimulation.Position(0,0)]
+
+        pos_lst = PacBotSimulation.setupPositionsRandom(1, pos_lst, arena)
+
+        self.assertEqual(pos_lst[0], PacBotSimulation.Position(0,0))
+        self.assertEqual(pos_lst[1], PacBotSimulation.Position(1,0))
+
+    def test_setupPositionsRandom_multiple_count(self):
+
+        arena = PacBotSimulation.Arena(5,5)
+        pos_lst = []
+
+        pos_lst = PacBotSimulation.setupPositionsRandom(5, pos_lst, arena)
+
+        self.assertEqual(len(pos_lst), 5)
+        for index in range(len(pos_lst)):
+            item = pos_lst[index]
+            list_before_index = pos_lst[0:index]
+            list_after_index = pos_lst[index+1:]
+            list_index_removed = list_before_index + list_after_index
+
+            self.assertTrue(item not in list_index_removed)
+
+    def test_setupPositionsRandomNonAdjacent(self):
+
+        arena = PacBotSimulation.Arena(2,2)
+        pos_lst = [PacBotSimulation.Position(0,0)]
+
+        pos_lst = PacBotSimulation.setupPositionsRandomNonAdjacent(1, pos_lst, arena)
+
+        self.assertEqual(len(pos_lst),2)
+        self.assertNotEqual(pos_lst[0], pos_lst[1])
+
+        self.assertEqual(pos_lst[1], PacBotSimulation.Position(1,1))
+
+    def test_setWallsRandom(self):
+
+        templateArena = PacBotSimulation.Arena(5,7)
+
+        totalSuccess = 0
+        wallFreq = 0.2
+
+        for i in range(30):
+            arena = PacBotSimulation.Arena(5,7)
+            arena = PacBotSimulation.setWallsRandom(arena, wallFreq)
+            if(arena != templateArena):
+                totalSuccess += 1
+
+        successFreq = totalSuccess/30.0
+        expectedFreq = 1- wallFreq
+        self.assertTrue(successFreq >= expectedFreq)
+
+    def test_removeIsolatingWalls(self):
+
+        arena = PacBotSimulation.Arena(7,7)
+        arena = PacBotSimulation.setWallsRandom(arena, 0.5)
+
+        enclosures = 0
+        enclosureRequirement = 3 # walls
+
+        arena = PacBotSimulation.removeIsolatingWalls(arena, enclosureRequirement)
+
+        notBorderRows = range(1, arena.getRows() - 1)
+        notBorderCols = range(1, arena.getCols() - 1)
+
+        for col in notBorderRows:
+            for row in notBorderCols:
+                currMask = arena.getMask(col, row, "rc")
+                if(currMask.getWallCount() > enclosureRequirement):
+                    enclosures += 1
+        
+        self.assertEqual(enclosures, 0)
+
+
+
+
+        
 
 
 
@@ -288,3 +372,4 @@ def doTests(unit_test):
 doTests(TestPosition)
 doTests(TestConnectivityMask)
 doTests(TestArena)
+doTests(TestSimulationFunctions)

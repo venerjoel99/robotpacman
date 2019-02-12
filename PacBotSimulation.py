@@ -148,7 +148,7 @@ class Arena(object):
         self.cols = col
         self.maze = fullMap()
 
-    def buildWallBetween(self, pos1, pos2):
+    def changeRelationBetween(self, pos1, pos2, connected=False):
         """
 
         a mutator function to prevent 2 directly adjacent connectivity mask positions from being able to connect
@@ -181,8 +181,8 @@ class Arena(object):
             col_lst.sort()
             smallerCol, largerCol = col_lst
 
-            self.maze[smallerCol][sharedRow].setRight(False)
-            self.maze[largerCol][sharedRow].setLeft(False)
+            self.maze[smallerCol][sharedRow].setRight(connected)
+            self.maze[largerCol][sharedRow].setLeft(connected)
 
         else: # col1 == col2
             sharedCol = col1
@@ -190,8 +190,8 @@ class Arena(object):
             row_lst.sort()
             smallerRow, largerRow = row_lst
 
-            self.maze[sharedCol][smallerRow].setDown(False)
-            self.maze[sharedCol][largerRow].setUp(False)
+            self.maze[sharedCol][smallerRow].setDown(connected)
+            self.maze[sharedCol][largerRow].setUp(connected)
 
     def initalizeBoundryWall(self):
         """
@@ -237,28 +237,31 @@ class Arena(object):
 
         return maze_test and row_test and col_test
 
-    def getMask(self, col, row, mode="rc"):
-        if(mode == "rc"):
-            return self.maze[col][row]
-        elif(mode == "xy"):
-            true_col = col
-            true_row = self.rows - row - 1
-            return self.maze[true_col][true_row]
-        else:
+    def convPosition(self, col, row, modeFrom="rc", modeInto="xy"):
+        validModes = ["xy", "rc"]
+        if modeFrom not in validModes or modeInto not in validModes:
             raise Exception("invalid mode specified. rc- row column. xy- cartesian")
+            
+        if(modeFrom == modeInto):
+            return Position(col, row)
+
+        flipRowIndex = lambda row: self.rows - row - 1
+
+        return Position(
+            col,
+            flipRowIndex(row)
+        )
+
+    def getMask(self, col, row, mode="rc"):
+        pos = self.convPosition(col, row, modeFrom=mode, modeInto="rc")
+        return self.maze[pos.getX()][pos.getY()]
 
     def setMask(self, col, row, value, mode="rc"):
-        if(mode == "rc"):
-            self.maze[col][row] = value
-        elif(mode == "xy"):
-            true_col = col
-            true_row = self.rows - row - 1
-            self.maze[true_col][true_row] = value
-        else:
-            raise Exception("invalid mode specified. rc- row colum. xy- cartesian")
+        pos = self.convPosition(col, row, modeFrom=mode, modeInto="rc")
+        self.maze[pos.getX()][pos.getY()] = value
 
 
-def setupPositionsRandom(charactercount, positions, row, column):
+def setupPositionsRandom(charactercount, positions, arena):
 
     """
     given a set of positions add a given number of new position that is not already in the list, and add it into the list. New unique position are selected randomly.
@@ -279,25 +282,25 @@ def setupPositionsRandom(charactercount, positions, row, column):
     positions : list<position>
         a list of positions with added positions appended to the end of it
     """
-    randomCol = lambda : random.randint(0, column-1)
-    randomRow = lambda : random.randint(0, row-1)
+    randomCol = lambda : random.randint(0, arena.getCols()-1)
+    randomRow = lambda : random.randint(0, arena.getRows()-1)
 
-    randomlyMakePosition = lambda : [randomRow(), randomCol()]
+    randomlyMakePosition = lambda : arena.convPosition(randomCol(), randomRow(), "rc", "xy")
 
     notUnique = lambda position: position in positions
 
-    for x in range(charactercount):
-        nextPosition = [randomlyMakePosition()]
+    for i in range(charactercount):
+        nextPosition = randomlyMakePosition()
 
-        while notUnique(nextPosition[0]): 
-            nextPosition = [randomlyMakePosition()]
+        while notUnique(nextPosition): 
+            nextPosition = randomlyMakePosition()
 
         #adds it to the rest of the positions
-        positions = positions + nextPosition
+        positions.append(nextPosition)
 
     return positions
 
-def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
+def setupPositionsRandomNonAdjacent(charactercount, positions, arena):
 
     """
     
@@ -320,31 +323,32 @@ def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
         a list of positions with added positions appended to the end of it
     """
 
-    randomCol = lambda : random.randint(0, column-1)
-    randomRow = lambda : random.randint(0, row-1)
 
-    randomlyMakePosition = lambda : [randomRow(), randomCol()]
+    def getAdjacent(pos):
+        x = pos.getX()
+        y = pos.getY()
 
-    notUnique = lambda position: position in positions
-
-    def getAdjacent(x,y):
-        return [x-1,y], [x+1,y], [x,y-1], [x,y+1]
+        return [ Position(x+1,y  ),
+                 Position(x  ,y+1),
+                 Position(x-1,y  ),
+                 Position(x  ,y-1)
+               ]
 
     for g in range(charactercount):
 
         #generates a unique nonadjacent position in the row column matrix
-        position = [randomlyMakePosition()]
+        position = setupPositionsRandom(1, positions, arena)[-1]
+        positions = positions[:-1]
         
-        inPosition = lambda pos : pos in positions
+        isPositionEquiv = lambda pos : pos in positions
+        containPosition = lambda pos, lst: True in map(isPositionEquiv, lst)
 
-        xPos = position[0][0]
-        yPos = position[0][1]
-
-        while ( notUnique(position[0]) or True in map(inPosition, getAdjacent(xPos, yPos)) ):
-              position = [randomlyMakePosition()]
+        while ( containPosition(position, getAdjacent(position) ) ):
+            position = setupPositionsRandom(1, positions, arena)[-1]
+            positions = positions[:-1]
 
         #adds it to the rest of the positions
-        positions = positions + position
+        positions.append(position)
 
     return positions
 
@@ -377,7 +381,7 @@ def setWallsRandom(arena, wallfrequency):
                 currTile = Position(xLoc, yLoc)
                 belowTile = Position(xLoc, yLoc - 1)
 
-                arena.buildWallBetween(currTile, belowTile)
+                arena.changeRelationBetween(currTile, belowTile)
 
     cols_with_right_col = arena.getCols() - 1
 
@@ -391,7 +395,7 @@ def setWallsRandom(arena, wallfrequency):
                 currTile = Position(xLoc, yLoc)
                 rightTile = Position(xLoc + 1, yLoc)
 
-                arena.buildWallBetween(currTile, rightTile)
+                arena.changeRelationBetween(currTile, rightTile)
 
     return arena
 
@@ -415,51 +419,61 @@ def removeIsolatingWalls(arena, maxwallcount):
     for col in range(arena.getCols()):
         for row in range(arena.getRows()):
 
-            x = col
-            y = row
-
-            #counts the walls
-            wallcount = 0
-            for bit_index in range(len(arena[col][row])):
-                if(arena[col][row][bit_index]):
-                    wallPresent = 0
-                else:
-                    wallPresent = 1
-
-                wallcount += wallPresent
 
             #randomly removes walls until there are few enough for a dot not to be isolated
-            while wallcount > maxwallcount:
+            currMask = arena.getMask(col, row, "rc")
+
+            testedSides = [False, False, False, False]
+
+            while currMask.getWallCount() > maxwallcount:
                 removeside = random.randint(0,3)
 
-                if ((not (x == 0 and removeside == 0)) and  # only remove if that side is not the boundry wall
-                    (not (x == (len(arena) - 1) and removeside == 1)) and
-                    (not (y == 0 and removeside == 2)) and
-                    (not (y == (len(arena[x]) - 1) and removeside == 3))):
+                UP = 0
+                LEFT = 1
+                RIGHT = 2
+                DOWN = 3
 
-                    #remove the first instance of the wall reference
-                    arena[x][y][removeside] = True
+                FIRST_COL = 0
+                LAST_COL = arena.getCols() - 1
+                FIRST_ROW = 0
+                LAST_ROW = arena.getRows() - 1
 
-                    if removeside == 0:
-                        #remove bottom wall second reference
-                        arena[x - 1][y][1] = True
+                cannotGoUp = row is FIRST_ROW
+                cannotGoDown = row is LAST_ROW
+                cannotGoLeft = col is FIRST_COL
+                cannotGoRight = col is LAST_COL 
 
-                    elif removeside == 1:
-                        #remove top wall second reference
-                        arena[x + 1][y][0] = True
+                invalidCases = (
+                                    (removeside == UP and cannotGoUp)     or (removeside == DOWN and cannotGoDown)   or
+                                    (removeside == LEFT and cannotGoLeft) or (removeside == RIGHT and cannotGoRight)
+                               )
 
-                    elif removeside == 2:
-                        #remove right wall second reference
-                        arena[x][y - 1][3] = True
+                allSidesTested = False not in testedSides
+                if(allSidesTested):
+                    break
 
-                    elif removeside == 3:
-                        #remove left wall of isolated point
-                        arena[x][y + 1][2] = True
+                if not invalidCases:
+                    
+                    pos1 = arena.convPosition(col, row, "rc", "xy")
+                    x = pos1.getX()
+                    y = pos1.getY()
 
-                    #recount walls for the while loop check
-                    wallcount = 0
-                    for z in range(len(arena[x][y])):
-                        wallcount = wallcount + 1 - int(arena[x][y][z])
+                    if removeside is UP:
+                        pos2 = Position(x, y+1)
+                        testedSides[UP] = True
+                    elif removeside is DOWN:
+                        pos2 = Position(x, y-1)
+                        testedSides[DOWN] = True
+                    elif removeside is LEFT:
+                        pos2 = Position(x-1, y)
+                        testedSides[LEFT] = True
+                    elif removeside is RIGHT:
+                        pos2 = Position(x, y+1)
+                        testedSides[RIGHT] = True
+                    else:
+                        raise Exception("issues are bound")
+
+                    arena.changeRelationBetween(pos1, pos2, True)
 
     return arena
 
