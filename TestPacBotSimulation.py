@@ -84,27 +84,28 @@ class TestConnectivityMask(unittest.TestCase):
         self.assertNotEqual(mask3, mask2)
         self.assertNotEqual(mask1, mask3)
 
+    def test_getWallCount(self):
+        mask1 = PacBotSimulation.ConnectivityMask()
+        self.assertEqual(mask1.getWallCount(), 0)
+
+        mask1.setUp(False)
+        self.assertEqual(mask1.getWallCount(), 1)
+
+        mask1.setLeft(False)
+        self.assertEqual(mask1.getWallCount(), 2)
+
+        mask1.setDown(False)
+        self.assertEqual(mask1.getWallCount(), 3)
+
+        mask1.setRight(False)
+        self.assertEqual(mask1.getWallCount(), 4)
+
 
 class TestArena(unittest.TestCase):
     def __init__(self, *args, **argw):
         super(TestArena, self).__init__(*args, **argw)
 
         self.ConnMask = PacBotSimulation.ConnectivityMask
-        ConnMaskEqual = lambda test: isinstance(test, self.ConnMask)
-
-        def maskConnectivity(testMaze):
-            newMaze = []
-            for item in testMaze:
-                if(type(item) is list):
-                    newMaze.append(maskConnectivity(item))
-                else:
-                    newMaze.append(ConnMaskEqual(item))
-            return newMaze
-
-        self.maskConnectivity = maskConnectivity
-
-
-                    
 
     def test_construction(self):
         arena = PacBotSimulation.Arena(3,2)
@@ -115,13 +116,7 @@ class TestArena(unittest.TestCase):
             [self.ConnMask(), self.ConnMask(), self.ConnMask()]
         ]
 
-        expectedMask = self.maskConnectivity(expectedResult)
-        actualMask = self.maskConnectivity(arena.maze)
-
-        
-
-        self.assertEqual(actualMask, expectedMask)
-
+        self.assertEqual(arena.maze, expectedResult)
     def test_construction_maze_shape(self):
         arena = PacBotSimulation.Arena(10,3)
 
@@ -146,24 +141,33 @@ class TestArena(unittest.TestCase):
 
         self.assertEqual(arena.maze[col][row].canGoDown(), True)
         self.assertEqual(arena.maze[col][row2].canGoUp(), True)
-        
+
         arena.buildWallBetween(pos1, pos2)
 
         self.assertEqual(arena.maze[col][row].canGoDown(), False)
         self.assertEqual(arena.maze[col][row2].canGoUp(), False)
 
-        arena = PacBotSimulation.Arena(10, 10)
+    def test_buildWallBetween_horizontal_order_independent(self):
+        x = 2
+        y = 7
 
+        arena = PacBotSimulation.Arena(10,10)
+
+        row = arena.getRows() - y - 1
+        col = x
+
+        pos1 = PacBotSimulation.Position(x,y)
+        pos2 = PacBotSimulation.Position(x, y-1)
+
+        row2 = arena.getRows() - (y-1) - 1
 
         self.assertEqual(arena.maze[col][row].canGoDown(), True)
         self.assertEqual(arena.maze[col][row2].canGoUp(), True)
-        
+
         arena.buildWallBetween(pos2, pos1)
 
         self.assertEqual(arena.maze[col][row].canGoDown(), False)
         self.assertEqual(arena.maze[col][row2].canGoUp(), False)
-
-    
 
     def test_buildWallBetween_verticle(self):
         x = 2
@@ -187,21 +191,70 @@ class TestArena(unittest.TestCase):
         self.assertEqual(arena.maze[col][row].canGoRight(), False)
         self.assertEqual(arena.maze[col2][row].canGoLeft(), False)
 
-        arena = PacBotSimulation.Arena(10, 10)
+    def test_buildWallBetween_verticle_order_independent(self):
+        x = 2
+        y = 7
 
+        arena = PacBotSimulation.Arena(10,10)
+
+        row = arena.getRows() - y - 1
+        col = x
+
+        pos1 = PacBotSimulation.Position(x,y)
+        pos2 = PacBotSimulation.Position(x+1, y)
+
+        col2 = x+1
 
         self.assertEqual(arena.maze[col][row].canGoRight(), True)
         self.assertEqual(arena.maze[col2][row].canGoLeft(), True)
         
-        arena.buildWallBetween(pos2, pos1)
+        arena.buildWallBetween(pos1, pos2)
 
         self.assertEqual(arena.maze[col][row].canGoRight(), False)
         self.assertEqual(arena.maze[col2][row].canGoLeft(), False)
-        
+    
+    
     def test_initalizeBoundryWall(self):
         arena = PacBotSimulation.Arena(3,4)
+        arena.initalizeBoundryWall()
 
-        raise Exception("test not implemented exception")
+        noUp = self.ConnMask()
+        noUp.setUp(False)
+
+        noDown = self.ConnMask()
+        noDown.setDown(False)
+
+        noLeft = self.ConnMask()
+        noLeft.setLeft(False)
+
+        noRight = self.ConnMask()
+        noRight.setRight(False)
+
+        topLeft = self.ConnMask()
+        topLeft.setLeft(False)
+        topLeft.setUp(False)
+
+        topRight = self.ConnMask()
+        topRight.setRight(False)
+        topRight.setUp(False)
+
+        bottomLeft = self.ConnMask()
+        bottomLeft.setLeft(False)
+        bottomLeft.setDown(False)
+
+        bottomRight = self.ConnMask()
+        bottomRight.setRight(False)
+        bottomRight.setDown(False)
+
+        middle = self.ConnMask()
+
+        expected = [
+            [  topLeft, noLeft, noLeft, bottomLeft],
+            [  noUp,    middle,  middle, noDown],
+            [ topRight, noRight, noRight, bottomRight]
+        ]
+
+        self.assertTrue(arena.maze, expected)
 
     def test_equality(self):
         arena1 = PacBotSimulation.Arena(5,2)
@@ -216,6 +269,8 @@ class TestArena(unittest.TestCase):
         self.assertEqual(arena1, arena3)
         self.assertNotEqual(arena2, arena1)
         self.assertNotEqual(arena4, arena1)
+
+
 
 
 

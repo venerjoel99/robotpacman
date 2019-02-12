@@ -93,6 +93,16 @@ class ConnectivityMask(object):
     def setDown(self, down):
         self.down = down
 
+    def getWallCount(self):
+        possibleWalls = [self.up, self.down, self.right, self.left]
+        findWalls = lambda opening: opening is False
+
+        wall_list = map(findWalls, possibleWalls)
+
+        countWalls = lambda totalWalls, nextWall: totalWalls + int(nextWall)
+        
+        return reduce(countWalls, wall_list)
+
     def __eq__(self, mask):
         if(not isinstance(mask, ConnectivityMask)):
             return False
@@ -221,7 +231,6 @@ class Arena(object):
         if(not isinstance(arena, Arena)):
             return False
 
-
         row_test = arena.getRows() is self.rows
         col_test = arena.getCols() is self.cols
         maze_test = (arena.maze == self.maze)
@@ -323,6 +332,8 @@ def setupPositionsRandomNonAdjacent(charactercount, positions, row, column):
 def setWallsRandom(arena, wallfrequency):
 
     """
+    mutator
+
     randomly assigns certain tiles where verticle or horizontal movement is blocked (i.e. generate walls above/below or left/right) of the tileand on the other side of the wall to assign a wall on an adjacent tile's respectively opposite side
 
     Parameters
