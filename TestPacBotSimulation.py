@@ -130,44 +130,34 @@ class TestArena(unittest.TestCase):
         y = 7
 
         arena = PacBotSimulation.Arena(10,10)
-
-        row = arena.getRows() - y - 1
-        col = x
-
+        
         pos1 = PacBotSimulation.Position(x,y)
         pos2 = PacBotSimulation.Position(x, y-1)
 
-        row2 = arena.getRows() - (y-1) - 1
-
-        self.assertEqual(arena.maze[col][row].canGoDown(), True)
-        self.assertEqual(arena.maze[col][row2].canGoUp(), True)
+        self.assertEqual(arena.getMask(x,y  ,"xy").canGoDown(), True)
+        self.assertEqual(arena.getMask(x,y-1,"xy").canGoUp(), True)
 
         arena.buildWallBetween(pos1, pos2)
 
-        self.assertEqual(arena.maze[col][row].canGoDown(), False)
-        self.assertEqual(arena.maze[col][row2].canGoUp(), False)
+        self.assertEqual(arena.getMask(x,y  ,"xy").canGoDown(), False)
+        self.assertEqual(arena.getMask(x,y-1,"xy").canGoUp(), False)
 
     def test_buildWallBetween_horizontal_order_independent(self):
         x = 2
         y = 7
 
         arena = PacBotSimulation.Arena(10,10)
-
-        row = arena.getRows() - y - 1
-        col = x
-
+        
         pos1 = PacBotSimulation.Position(x,y)
         pos2 = PacBotSimulation.Position(x, y-1)
 
-        row2 = arena.getRows() - (y-1) - 1
-
-        self.assertEqual(arena.maze[col][row].canGoDown(), True)
-        self.assertEqual(arena.maze[col][row2].canGoUp(), True)
+        self.assertEqual(arena.getMask(x,y  ,"xy").canGoDown(), True)
+        self.assertEqual(arena.getMask(x,y-1,"xy").canGoUp(), True)
 
         arena.buildWallBetween(pos2, pos1)
 
-        self.assertEqual(arena.maze[col][row].canGoDown(), False)
-        self.assertEqual(arena.maze[col][row2].canGoUp(), False)
+        self.assertEqual(arena.getMask(x,y  ,"xy").canGoDown(), False)
+        self.assertEqual(arena.getMask(x,y-1,"xy").canGoUp(), False)
 
     def test_buildWallBetween_verticle(self):
         x = 2
@@ -175,21 +165,16 @@ class TestArena(unittest.TestCase):
 
         arena = PacBotSimulation.Arena(10,10)
 
-        row = arena.getRows() - y - 1
-        col = x
-
         pos1 = PacBotSimulation.Position(x,y)
         pos2 = PacBotSimulation.Position(x+1, y)
 
-        col2 = x+1
-
-        self.assertEqual(arena.maze[col][row].canGoRight(), True)
-        self.assertEqual(arena.maze[col2][row].canGoLeft(), True)
+        self.assertEqual(arena.getMask(x  ,y,"xy").canGoRight(), True)
+        self.assertEqual(arena.getMask(x+1,y,"xy").canGoLeft(), True)
         
         arena.buildWallBetween(pos1, pos2)
 
-        self.assertEqual(arena.maze[col][row].canGoRight(), False)
-        self.assertEqual(arena.maze[col2][row].canGoLeft(), False)
+        self.assertEqual(arena.getMask(x  ,y,"xy").canGoRight(), False)
+        self.assertEqual(arena.getMask(x+1,y,"xy").canGoLeft(), False)
 
     def test_buildWallBetween_verticle_order_independent(self):
         x = 2
@@ -197,21 +182,16 @@ class TestArena(unittest.TestCase):
 
         arena = PacBotSimulation.Arena(10,10)
 
-        row = arena.getRows() - y - 1
-        col = x
-
         pos1 = PacBotSimulation.Position(x,y)
         pos2 = PacBotSimulation.Position(x+1, y)
 
-        col2 = x+1
-
-        self.assertEqual(arena.maze[col][row].canGoRight(), True)
-        self.assertEqual(arena.maze[col2][row].canGoLeft(), True)
+        self.assertEqual(arena.getMask(x  ,y,"xy").canGoRight(), True)
+        self.assertEqual(arena.getMask(x+1,y,"xy").canGoLeft(), True)
         
-        arena.buildWallBetween(pos1, pos2)
+        arena.buildWallBetween(pos2, pos1)
 
-        self.assertEqual(arena.maze[col][row].canGoRight(), False)
-        self.assertEqual(arena.maze[col2][row].canGoLeft(), False)
+        self.assertEqual(arena.getMask(x  ,y,"xy").canGoRight(), False)
+        self.assertEqual(arena.getMask(x+1,y,"xy").canGoLeft(), False)
     
     
     def test_initalizeBoundryWall(self):
@@ -255,6 +235,32 @@ class TestArena(unittest.TestCase):
         ]
 
         self.assertTrue(arena.maze, expected)
+
+
+    def test_getMask(self):
+        arena = PacBotSimulation.Arena(5,5)
+        mask1 = self.ConnMask()
+        mask1.setUp(False)
+
+        arena.maze[2][3].setUp(False)
+
+        self.assertEqual(arena.getMask(2,3)      , mask1)
+        self.assertEqual(arena.getMask(2,1, "xy"), mask1)
+
+    def test_setMask(self):
+        arena = PacBotSimulation.Arena(5,5)
+
+        mask1 = self.ConnMask()
+        mask1.setUp(False)
+
+        arena.setMask(2,3, mask1)
+        self.assertEqual(arena.getMask(2,3), mask1)
+
+        arena.setMask(2,2, mask1, "xy")
+        self.assertEqual(arena.getMask(2,2, "xy"), mask1)
+
+
+
 
     def test_equality(self):
         arena1 = PacBotSimulation.Arena(5,2)

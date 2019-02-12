@@ -237,6 +237,26 @@ class Arena(object):
 
         return maze_test and row_test and col_test
 
+    def getMask(self, col, row, mode="rc"):
+        if(mode == "rc"):
+            return self.maze[col][row]
+        elif(mode == "xy"):
+            true_col = col
+            true_row = self.rows - row - 1
+            return self.maze[true_col][true_row]
+        else:
+            raise Exception("invalid mode specified. rc- row column. xy- cartesian")
+
+    def setMask(self, col, row, value, mode="rc"):
+        if(mode == "rc"):
+            self.maze[col][row] = value
+        elif(mode == "xy"):
+            true_col = col
+            true_row = self.rows - row - 1
+            self.maze[true_col][true_row] = value
+        else:
+            raise Exception("invalid mode specified. rc- row colum. xy- cartesian")
+
 
 def setupPositionsRandom(charactercount, positions, row, column):
 
