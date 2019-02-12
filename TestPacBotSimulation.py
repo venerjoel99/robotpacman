@@ -43,6 +43,15 @@ class TestPosition(unittest.TestCase):
         self.assertEqual(position1.y, 15)
         self.assertEqual(position1.x, 10)
 
+    def test_equality(self):
+        position1 = PacBotSimulation.Position(10, 7)
+        position2 = PacBotSimulation.Position(3,5)
+        position3 = PacBotSimulation.Position(10,7)
+
+        self.assertNotEqual(position1, position2)
+        self.assertEqual(position1, position3)
+        self.assertNotEqual(position3, position2)
+
 
 class TestConnectivityMask(unittest.TestCase):
     def __init__(self, *args, **argw):
@@ -63,6 +72,18 @@ class TestConnectivityMask(unittest.TestCase):
         connMask1.removeFood()
         self.assertEqual(connMask1.containFood, False)
 
+    def test_equality(self):
+        mask1 = PacBotSimulation.ConnectivityMask()
+        mask2 = PacBotSimulation.ConnectivityMask()
+        mask3 = PacBotSimulation.ConnectivityMask()
+
+        mask1.setUp(False)
+        mask2.setUp(False)
+
+        self.assertEqual(mask1, mask2)
+        self.assertNotEqual(mask3, mask2)
+        self.assertNotEqual(mask1, mask3)
+
 
 class TestArena(unittest.TestCase):
     def __init__(self, *args, **argw):
@@ -81,6 +102,9 @@ class TestArena(unittest.TestCase):
             return newMaze
 
         self.maskConnectivity = maskConnectivity
+
+
+                    
 
     def test_construction(self):
         arena = PacBotSimulation.Arena(3,2)
@@ -175,7 +199,26 @@ class TestArena(unittest.TestCase):
         self.assertEqual(arena.maze[col2][row].canGoLeft(), False)
         
     def test_initalizeBoundryWall(self):
-        raise Exception("not implemented test")
+        arena = PacBotSimulation.Arena(3,4)
+
+        raise Exception("test not implemented exception")
+
+    def test_equality(self):
+        arena1 = PacBotSimulation.Arena(5,2)
+        arena2 = PacBotSimulation.Arena(3,4)
+        arena3 = PacBotSimulation.Arena(5,2)
+        arena4 = PacBotSimulation.Arena(5,2)
+
+        arena4.maze[0][0].setUp(False)
+
+        self.assertEqual(arena1==arena3, True)
+
+        self.assertEqual(arena1, arena3)
+        self.assertNotEqual(arena2, arena1)
+        self.assertNotEqual(arena4, arena1)
+
+
+
 
 def doTests(unit_test):
     suite = unittest.TestLoader().loadTestsFromTestCase(unit_test)

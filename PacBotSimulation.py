@@ -28,6 +28,15 @@ class Position(object):
     def setY(self, y):
         self.y = y
 
+    def __eq__(self, pos):
+        if( not isinstance(pos, Position)):
+            return False
+
+        x_test = self.x is pos.getX()
+        y_test = self.y is pos.getY()
+
+        return x_test and y_test
+
     
 
 class ARENA_BIT_MASK(enum.Enum):
@@ -83,6 +92,18 @@ class ConnectivityMask(object):
 
     def setDown(self, down):
         self.down = down
+
+    def __eq__(self, mask):
+        if(not isinstance(mask, ConnectivityMask)):
+            return False
+
+        right_test = self.right is mask.canGoRight()
+        left_test = self.left is mask.canGoLeft()
+        up_test = self.up is mask.canGoUp()
+        down_test = self.down is mask.canGoDown()
+        food_test = self.containFood is mask.isFoodPresent()
+
+        return right_test and left_test and up_test and down_test and food_test
 
 
 
@@ -195,6 +216,17 @@ class Arena(object):
 
     def getCols(self):
         return self.cols
+
+    def __eq__(self, arena):
+        if(not isinstance(arena, Arena)):
+            return False
+
+
+        row_test = arena.getRows() is self.rows
+        col_test = arena.getCols() is self.cols
+        maze_test = (arena.maze == self.maze)
+
+        return maze_test and row_test and col_test
 
 
 def setupPositionsRandom(charactercount, positions, row, column):
