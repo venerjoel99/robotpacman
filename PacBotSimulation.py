@@ -37,14 +37,26 @@ class Position(object):
 
         return x_test and y_test
 
+class Vector(object):
+    
+    def __init__(self, direction):
+        self.direction = direction
+
+    def _getValue(self):
+        return self.direction
+
+    def __eq__(self, vec):
+        if( not isinstance(vec, Vector) ):
+            return False
+        return self.direction == vec._getValue()
+
     
 
-class ARENA_BIT_MASK(enum.Enum):
+class Direction(enum.Enum):
     RIGHT = 0
     LEFT = 1
     UP = 2
     DOWN = 3
-    DOT = 4
 
 class ConnectivityMask(object):
     """
@@ -448,10 +460,6 @@ def removeIsolatingWalls(arena, maxwallcount):
                                     (removeside == LEFT and cannotGoLeft) or (removeside == RIGHT and cannotGoRight)
                                )
 
-                allSidesTested = False not in testedSides
-                if(allSidesTested):
-                    break
-
                 if not invalidCases:
                     
                     pos1 = arena.convPosition(col, row, "rc", "xy")
@@ -460,16 +468,12 @@ def removeIsolatingWalls(arena, maxwallcount):
 
                     if removeside is UP:
                         pos2 = Position(x, y+1)
-                        testedSides[UP] = True
                     elif removeside is DOWN:
                         pos2 = Position(x, y-1)
-                        testedSides[DOWN] = True
                     elif removeside is LEFT:
                         pos2 = Position(x-1, y)
-                        testedSides[LEFT] = True
                     elif removeside is RIGHT:
                         pos2 = Position(x, y+1)
-                        testedSides[RIGHT] = True
                     else:
                         raise Exception("issues are bound")
 
@@ -479,35 +483,72 @@ def removeIsolatingWalls(arena, maxwallcount):
 
 def eatDot(arena, positions, playercount):
 
-        for player in range(playercount):
-            #dot is now false on the player location for all possible players
-            arena[positions[player][0]][positions[player][1]][4] = False
+    for player_index in range(playercount):
+        #dot is now false on the player location for all possible players
+        curr_player = positions[player_index]
+        arena.getMask(curr_player.getX(), curr_player.getY(), "xy").removeFood()
 
 def moveCharacter(positions, directionlist, character, arena):  #NEEDS DEBUGGING / CHECKED FOR ACCURACY, ALSO NEEDS CHARACTER OVERLAP DETECTION AND WALL IMPLEMENTATIONS
 
+    """
+    a function to make teh character move along the positions one at a time along the direction list for that position updating
+    its old position to account for all of its move so long it dosen't collide aginst the wall
+
+    Parameters:
+    -----------
+    positions: list<Position>
+        a list for the positions of each character
+    directionlist: list<Enum Direction>
+        a list of the directions a given character will make in sequence
+    character : integer
+        the index of the character selected
+    arena : Arena
+        arena object which represents the maze the pacbot is navigating through
+
+    Returns:
+    --------
+    character_position: Position
+        the new position of the character after going through the entire direction sequence
+
+    Errors:
+    -------
+    invalid_direction: Exception
+        direction will cause the character to go out of the bounds of the maze
+
+
+    """
+
+    curr_char = positions[character]
+
     for direction in directionlist:
 
+        LAST_ROW = curr_char.getY() == 0
+        FIRST_ROW = curr_char.getY() == arena.getRows() - 1
+
+        FIRST_COL = curr_char.getX() == 0
+        LAST_COL = curr_char.getX() == arena.getCols() - 1
+
+        y = curr_char.getY()
+        x = curr_char.getX()
+
         #moves down unless it will go out of bounds
-        if direction == 0 and positions[character][1] > 0:
-            positions[character][1] = positions[character][1] - 1
+        if direction == Direction.DOWN.value and not LAST_ROW:
+            curr_char.setY(y - 1)
             return positions
-
-        #moves up unless it will go out of bounds
-        elif direction == 1 and positions[character][1] - 1 < len(arena[0]):
-            positions[character][1] = positions[character][1] + 1
+        elif direction == Direction.UP.value and not FIRST_ROW:
+            curr_char.setY(y + 1)
             return positions
-
-        #moves right unless it will go out of bounds
-        elif direction == 2 and positions[character][0] - 1 < len(arena):
-            positions[character][1] = positions[character][1] + 1
+        elif direction == Direction.RIGHT.value and not LAST_COL:
+            curr_char.setX(x + 1)
             return positions
-
-        #moves left unless it will go out of bounds
-        elif direction == 3 and positions[character][0] > 0:
-            positions[character][1] = positions[character][1] - 1
+        elif direction == Direction.LEFT.value and not FIRST_COL:
+            curr_char.setX(x - 1)
             return positions
+        else:
+            raise Exception("position list contain invalid direction value: %d"%direction)
 
-def gameOverCheck(positions, charactercount):   #NEEDS DEBUGGING / CHECKED FOR ACCURACY
+
+def gameOverCheck(positions, charactercount):   #NEEDS DEBUGGING / CHECKED FOR ACCURACY. a certain position is overlap or adjacent to any entity in the positions list
 
     for g in range(charactercount - 1):
         if (position[0] in positions or

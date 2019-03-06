@@ -358,6 +358,20 @@ class TestSimulationFunctions(unittest.TestCase):
         self.assertEqual(enclosures, 0)
 
 
+    def test_eatDot_randomly(self):
+        arena = PacBotSimulation.Arena(5,5)
+        players = PacBotSimulation.setupPositionsRandomNonAdjacent(5, [], arena)
+
+        PacBotSimulation.eatDot(arena, players, 5)
+
+        for item in players:
+            x = item.getX()
+            y = item.getY()
+
+            self.assertFalse(arena.getMask(x,y,"xy").isFoodPresent())
+
+
+
 
 
         
